@@ -40,7 +40,8 @@ cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
 | **Danger**                                        |
 | ------------------------------------------------- |
 | Attacker executes JavaScript in victim's browser. |
-| *Session hijack, phishing*                        |
+| *Session hijack, phishing*  
+
 **Detection Technique:**
 - Detect unsafe sinks:
 ```
@@ -75,6 +76,7 @@ element.textContent = userInput;
 | **Danger**                                                  |
 | ----------------------------------------------------------- |
 | Attacker executes arbitrary commands via application logic. |
+
 **Detection Technique:**
 - Detect command execution APIs with user input:
 ```
@@ -104,6 +106,7 @@ subprocess.run(["ping", host], shell=False)
 | --------------------- |
 | Authentication bypass |
 | Data exposure         |
+
 **Detection Technique:**
 - Regex detecting LDAP filter construction using user input.
 ```
@@ -134,6 +137,7 @@ filter = "(uid=" + username + ")"
 | --------------------------------- |
 | Attacker manipulates XML queries. |
 | *Unauthorized data access*        |
+
 **Detection Technique:**
 ```
 (xpath|selectNodes|evaluate).*\+.*(input|params)
@@ -164,6 +168,7 @@ xpath.evaluate("//user[name='" + input + "']", doc)
 | ----------------------------------- |
 | HTTP response splitting.            |
 | *Header injection, cache poisoning* |
+
 **Detection Technique:**
 ```
 \\r\\n|%0d%0a
@@ -192,6 +197,7 @@ response.setHeader("X-User", userInput)
 | **Danger**                |
 | ------------------------- |
 | Arbitrary code execution. |
+
 **Detection Technique:**
 ```
 \b(eval)\b
@@ -222,6 +228,7 @@ eval(userInput)
 | ----------------------------------- |
 | Attacker-controlled code execution. |
 | *Remote code execution, backdoors*  |
+
 **Detection Techniques:**
 ```
 (include|require|require_once|importlib|loadFile).*(input|params|request)
@@ -260,6 +267,7 @@ include $allowed[$page];
 | --------------------------------------- |
 | Execution of operating system commands. |
 | *System compromise, data exfiltration*  |
+
 **Detection Technique:**
 ```
 (os\.system|subprocess|Runtime\.exec|ProcessBuilder).*(input|params)
@@ -296,6 +304,7 @@ subprocess.run(["ls", userInput], shell=False)
 | ------------------------------------------ |
 | Remote attacker-controlled code execution. |
 | *Malware delivery, full compromise*        |
+
 **Detection Technique:**
 ```
 (include|require).*(http|https|ftp)
@@ -330,6 +339,7 @@ include $_GET["url"];
 | --------------------------------------- |
 | Unauthorized file system access.        |
 | *Credential leakage, source disclosure* |
+
 **Detection Technique:**
 ```
 (\.\./|\.\.\\).*(input|params)
@@ -367,6 +377,7 @@ os.path.realpath(path).startswith(base_dir)
 | ----------------------------------- |
 | Credential exposure in source code. |
 | *Account compromise*                |
+
 **Detection Technique:**
 ```
 (password|secret|api_key)\s*=\s*["']
@@ -396,6 +407,7 @@ DB_PASSWORD = "admin123"
 | -------------------------------------------- |
 | Disclosure of credentials or internal logic. |
 | *Reconnaissance, lateral movement*           |
+
 **Detection Technique:**
 ```
 (comment).*(password|token|key)
@@ -425,6 +437,7 @@ DB_PASSWORD = "admin123"
 | ------------------------------------------------- |
 | Information leakage and attack surface expansion. |
 | *Stack traces, secret exposure*                   |
+
 **Detection Technique:**
 ```
 (debug|DEBUG|console\.log|printStackTrace)
@@ -455,6 +468,7 @@ DEBUG = true
 | -------------------------------- |
 | Credentials stored in log files. |
 | *Post-compromise escalation*     |
+
 **Detection Technique:**
 ```
 (log|print).*(password|token|secret)
@@ -485,6 +499,7 @@ logger.info("Password: %s", password)
 | ------------------------------------------ |
 | Internal application structure disclosure. |
 | *Reconnaissance*                           |
+
 **Detection Technique:**
 ```
 printStackTrace|traceback\.print_exc
@@ -513,6 +528,7 @@ e.printStackTrace();
 | **Danger**                   |
 | ---------------------------- |
 | Application crashes and DoS. |
+
 **Detection Technique:**
 ```
 variable\.method\(\)  // without prior null check
