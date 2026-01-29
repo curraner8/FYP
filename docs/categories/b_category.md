@@ -109,3 +109,193 @@ pickle.loads(data)
 | **Why:**            | Code execution during deserialization |
 
 ---
+
+### 4. Java Deserialization (`ObjectInputStream`)
+
+| **Danger**                            |
+| ------------------------------------- |
+| Gadget-chain deserialization attacks. |
+| *Remote code execution*               |
+
+**Detection Technique:**
+```
+ObjectInputStream
+```
+
+**Why This Works:**
+- Java deserialization vulnerabilities are *API-level* flaws.
+- Presence alone warrants warning.
+
+**Vulnerable Example:**
+```
+ObjectInputStream ois = new ObjectInputStream(stream);
+```
+
+**Remedy:**
+- Avoid Java serialization.
+- Use safe formats (JSON, protobuf).
+- Apply deserialization filters.
+
+| **Security Score:** | Critical (-30)          |
+| ------------------- | ----------------------- |
+| **Why:**            | Known RCE attack vector |
+
+---
+
+### 5. Unsafe YAML Parsing (`yaml.load`)
+
+| **Danger**                           |
+| ------------------------------------ |
+| Object instantiation during parsing. |
+| *Code execution*                     |
+
+**Detection Technique:**
+```
+yaml\.load\s*\(
+```
+
+**Why This Works:**
+- `yaml.load` executes constructors by default.
+- Unsafe regardless of input origin.
+
+**Vulnerable Example:**
+```
+yaml.load(data)
+```
+
+**Remedy:**
+```
+yaml.safe_load(data)
+```
+
+| **Why the Remedy Works:**     |
+| ----------------------------- |
+| Disables object construction. |
+
+| **Security Score:** | High (-20)           |
+| ------------------- | -------------------- |
+| **Why:**            | Deserialization risk |
+
+---
+
+### 6. Shell Invocation via `subprocess`
+
+| **Danger**                       |
+| -------------------------------- |
+| Shell command injection surface. |
+| *Command chaining*               |
+
+**Detection Technique:**
+```
+subprocess\.(call|run|Popen).*shell\s*=\s*True
+```
+
+**Why This Works:**
+- `shell=True` explicitly enables shell parsing.
+- Risk exists even with constant commands.
+
+**Vulnerable Example:**
+```
+subprocess.call(cmd, shell=True)
+```
+
+**Remedy:**
+```
+subprocess.run(["cmd", "arg"], shell=False)
+```
+
+
+| **Security Score:** | High (-20)                |
+| ------------------- | ------------------------- |
+| **Why:**            | Enables command injection |
+
+---
+
+### 7. Weak Cryptographic Hashes (`md5`, `sha1`)
+
+| **Danger**                              |
+| --------------------------------------- |
+| Hash collision and brute-force attacks. |
+| *Credential compromise*                 |
+
+**Detection Technique:**
+````
+(md5|sha1)\s*\(
+````
+
+**Why This Works:**
+- Weak algorithms are *cryptographically broken*.
+- No contextual analysis required.
+
+**Vulnerable Example:**
+```
+hashlib.md5(password)
+```
+
+**Remedy:**
+- Use `bcrypt`, `argon2`, or `PBKDF2`.
+
+| **Security Score:** | High (-20)         |
+| ------------------- | ------------------ |
+| **Why:**            | Predictable hashes |
+
+---
+
+### 8. Insecure Random Number Generator (`Math.random`)
+
+| **Danger**                     |
+| ------------------------------ |
+| Predictable tokens or secrets. |
+| *Session hijacking*            |
+
+**Detection Technique:**
+```
+Math\.random
+```
+
+**Why This Works:**
+- `Math.random` is *not cryptographically secure*.
+- Any security-sensitive use is unsafe.
+
+**Vulnerable Example:**
+```
+token = Math.random()
+```
+
+**Remedy:**
+- Use `crypto.getRandomValues`.
+
+| **Security Score:** | Medium (-10)        |
+| ------------------- | ------------------- |
+| **Why:**            | Predictable entropy |
+
+---
+
+### 9. Insecure XML Parsers
+
+| **Danger**              |
+| ----------------------- |
+| XXE attacks.            |
+| *File disclosure, SSRF* |
+
+**Detection Technique:**
+```
+DocumentBuilderFactory\.newInstance
+```
+
+**Why This Works:**
+- XML parsers are unsafe by default.
+- Security depends on flags being disabled.
+
+**Vulnerable Example:**
+```
+DocumentBuilderFactory.newInstance()
+```
+
+**Remedy:**
+- Disable external entities.
+- Enable secure processing.
+
+| **Security Score:** | High (-20)              |
+| ------------------- | ----------------------- |
+| **Why:**            | File and network access |
