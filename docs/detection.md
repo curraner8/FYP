@@ -2,9 +2,9 @@
 
 | Class                         | Can I detect it? | How?                   |
 | ----------------------------- | ---------------- | ---------------------- |
-| **A. Direct Static Pattern**  | ==Yes==          | Regex/AST              |
-| **B. API Misuse**             | ==Yes==          | Function name matching |
-| **C. Configuration / Flags**  | ==Yes==          | Config scanning        |
+| **A. Direct Static Pattern**  | Yes          | Regex/AST              |
+| **B. API Misuse**             | Yes          | Function name matching |
+| **C. Configuration / Flags**  | Yes          | Config scanning        |
 | **D. Heuristic / Smell**      | *Partial*        | Risk indicators        |
 | **E. Dependency / External**  | *Partial*        | Manifest + CVE DB      |
 | **F. Design / Runtime Logic** | No               | Document only          |
