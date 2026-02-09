@@ -8,6 +8,11 @@ import (
 	"FYP/backend/handlers"
 )
 
+// for frontend web app version
+// waits for incoming requests
+// go run (path)/server / go run main.go
+// run with frontend (path)/frontend -> quasar dev
+
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")

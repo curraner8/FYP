@@ -10,6 +10,10 @@ import (
 	"FYP/backend/scanner"
 )
 
+// takes a directory path as command line argument and prints JSON results to stdout
+// go run main.go (path)
+// runs once then exits
+
 func main() {
 	root := "."
 	if len(os.Args) > 1 {
