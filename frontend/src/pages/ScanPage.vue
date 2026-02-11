@@ -54,7 +54,7 @@
                     Code: <code>{{ finding.snippet }}</code>
                   </q-item-label>
                   <q-item-label caption class="text-green-8">
-                    💡 {{ finding.recommendation }}
+                    {{ finding.recommendation }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
