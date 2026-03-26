@@ -38,7 +38,7 @@ func (d *ClassFDetector) Detect(filename, content string) []models.Finding {
 				Recommendation: "MANUAL REVIEW: use atomic operations or database transactions",
 				Severity:       "medium",
 				Confidence:     "low",
-				ScoreImpact:    -10,
+				ScoreImpact:    -3,
 			})
 		}
 	}
@@ -57,7 +57,7 @@ func (d *ClassFDetector) Detect(filename, content string) []models.Finding {
 				Recommendation: "MANUAL REVIEW: Verify authorization, validation, and workflow enforcement",
 				Severity:       "medium",
 				Confidence:     "low",
-				ScoreImpact:    -10,
+				ScoreImpact:    -2,
 			})
 		}
 	}
@@ -76,7 +76,7 @@ func (d *ClassFDetector) Detect(filename, content string) []models.Finding {
 				Recommendation: "MANUAL REVIEW: Verify zero-trust architecture. Validate all inputs at boundaries",
 				Severity:       "high",
 				Confidence:     "low",
-				ScoreImpact:    -15,
+				ScoreImpact:    -5,
 			})
 		}
 	}
@@ -95,7 +95,7 @@ func (d *ClassFDetector) Detect(filename, content string) []models.Finding {
 				Recommendation: "MANUAL REVIEW: Verify secure session handling, token validation, and flow correctness",
 				Severity:       "high",
 				Confidence:     "low",
-				ScoreImpact:    -15,
+				ScoreImpact:    -5,
 			})
 		}
 	}

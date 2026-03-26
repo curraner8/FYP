@@ -68,7 +68,7 @@ func ScanFiles(files []struct {
 		Grade: grade,
 		Summary: models.Summary{
 			TotalFiles:      len(files),
-			FilesWithIssues: len(fileResults),
+			FilesWithIssues: len(allFindings),
 			ScoreBreakdown:  breakdown,
 		},
 	}

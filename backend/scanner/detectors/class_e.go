@@ -66,9 +66,9 @@ func (d *ClassEDetector) checkPackageJSON(filename, content string) []models.Fin
 				Line:           1,
 				Snippet:        match[0],
 				Recommendation: "Update to stable version (1.0+) or verify API stability",
-				Severity:       "medium",
-				Confidence:     "medium",
-				ScoreImpact:    -15,
+				Severity:       "low",
+				Confidence:     "low",
+				ScoreImpact:    -5,
 			})
 		}
 	}
@@ -112,9 +112,9 @@ func (d *ClassEDetector) checkRequirementsTxt(filename, content string) []models
 				Line:           lineNum + 1,
 				Snippet:        strings.TrimSpace(line),
 				Recommendation: "Pin versions: package==1.2.3; use pip freeze > requirements.txt",
-				Severity:       "medium",
-				Confidence:     "medium",
-				ScoreImpact:    -15,
+				Severity:       "low",
+				Confidence:     "low",
+				ScoreImpact:    -14,
 			})
 		}
 	}
@@ -139,7 +139,7 @@ func (d *ClassEDetector) checkInstallScripts(filename, content string) []models.
 			Recommendation: "Verify checksums before execution; use package managers",
 			Severity:       "critical",
 			Confidence:     "high",
-			ScoreImpact:    -30,
+			ScoreImpact:    -28,
 		})
 	}
 
@@ -166,9 +166,9 @@ func (d *ClassEDetector) checkOutdatedDeps(filename, content string) []models.Fi
 					Line:           1,
 					Snippet:        match[0],
 					Recommendation: "Update to latest stable version and review changelog for security fixes",
-					Severity:       "medium",
-					Confidence:     "medium",
-					ScoreImpact:    -15,
+					Severity:       "low",
+					Confidence:     "low",
+					ScoreImpact:    -6,
 				})
 			}
 		}

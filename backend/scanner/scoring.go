@@ -5,12 +5,6 @@ import (
 )
 
 func ComputeScore(findings []models.Finding) (int, string, models.ScoreBreakdown) {
-	weights := map[string]int{
-		"critical": -30,
-		"high": -20,
-		"medium": -10,
-		"low": -5,
-	}
 
 	base := 100
 	penalty := 0
@@ -20,22 +14,18 @@ func ComputeScore(findings []models.Finding) (int, string, models.ScoreBreakdown
 	lowCount := 0
 
 	for _, finding := range findings {
-		weight, exists := weights[finding.Severity]
-		if !exists {
-			continue
-		}
-
-		penalty += weight
+		impact := finding.ScoreImpact
+		penalty += impact
 
 		switch finding.Severity {
 		case "critical":
-			criticalCount++
+			criticalCount += impact
 		case "high":
-			highCount++
+			highCount += impact
 		case "medium":
-			mediumCount++
+			mediumCount += impact
 		case "low":
-			lowCount++
+			lowCount += impact
 		}
 	}
 
@@ -46,23 +36,23 @@ func ComputeScore(findings []models.Finding) (int, string, models.ScoreBreakdown
 
 	var grade string
 	switch {
-		case final >= 90:
-			grade = "A"
-		case final >= 75:
-			grade = "B"
-		case final >= 50:
-			grade = "C"
-		default:
-			grade = "D"
+	case final >= 90:
+		grade = "A"
+	case final >= 75:
+		grade = "B"
+	case final >= 50:
+		grade = "C"
+	default:
+		grade = "D"
 	}
 
 	breakdown := models.ScoreBreakdown{
-		Critical: criticalCount * weights["critical"],
-		High: highCount * weights["high"],
-		Medium: mediumCount * weights["medium"],
-		Low: lowCount * weights["low"],
-		Base: base,
-		Final: final,
+		Critical: criticalCount,
+		High:     highCount,
+		Medium:   mediumCount,
+		Low:      lowCount,
+		Base:     base,
+		Final:    final,
 	}
 
 	return final, grade, breakdown

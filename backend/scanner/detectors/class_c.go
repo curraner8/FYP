@@ -16,7 +16,7 @@ func NewClassCDetector() *ClassCDetector {
 		BaseDetector: BaseDetector{
 			class:       "C",
 			name:        "Configuration Issues",
-			description: "Detects insecure configuratio and missing security headers",
+			description: "Detects insecure configuration and missing security headers",
 		},
 		rules: []PatternRule{
 			// Debug Mode
@@ -27,7 +27,7 @@ func NewClassCDetector() *ClassCDetector {
 				Description:    "Debug mode enabled in production",
 				Pattern:        regexp.MustCompile(`(?i)(DEBUG\s*=\s*True|debug\s*:\s*true|app\.debug\s*=\s*true|APP_DEBUG\s*=\s*true|enable_debug\s*\(\s*true\s*\))`),
 				Recommendation: "Set DEBUG to false in production; use environment variables",
-				Score:          -20,
+				Score:          -18,
 			},
 			// Missing HTTPS
 			// ****CAUSES ERROR****
@@ -38,7 +38,7 @@ func NewClassCDetector() *ClassCDetector {
 			// 	Description:    "HTTP used instead of HTTPS",
 			// 	Pattern:        regexp.MustCompile(`(?i)(http://(?!localhost|127\.0\.0\.1)|ssl\s*=\s*False|verify\s*=\s*False|rejectUnauthorized\s*:\s*false)`),
 			// 	Recommendation: "Enforce HTTPS; set ssl to true and verify certificate",
-			// 	Score:          -20,
+			// 	Score:          -19,
 			// },
 			// Insecure Cookies
 			// ****CAUSES ERROR****
@@ -49,7 +49,7 @@ func NewClassCDetector() *ClassCDetector {
 			// 	Description:    "Cookie missing security flags",
 			// 	Pattern:        regexp.MustCompile(`(?i)(Set-Cookie|res\.cookie|response\.setCookie).*(?![\s\S]*?(HttpOnly))(?![\s\S]*?(Secure))`),
 			// 	Recommendation: "Add HttpOnly, Secure, and SameSite=Strict flags to cookies",
-			// 	Score:          -20,
+			// 	Score:          -17,
 			// },
 			// Directory Listing
 			{
@@ -69,7 +69,7 @@ func NewClassCDetector() *ClassCDetector {
 				Description:    "Verbose error messages enabled",
 				Pattern:        regexp.MustCompile(`(?i)(app\.use\s*\(\s*errorhandler|error_reporting\s*\(\s*E_ALL|display_errors\s*=\s*On|app\.config\['DEBUG'\]\s*=\s*True)`),
 				Recommendation: "Use generic error pages; log details server-side only",
-				Score:          -15,
+				Score:          -6,
 			},
 			// Config file secrects
 			{
@@ -79,7 +79,7 @@ func NewClassCDetector() *ClassCDetector {
 				Description:    "Secrets in configuration files",
 				Pattern:        regexp.MustCompile(`(?i)(config|settings|\.env|\.ini|\.conf).*(password|secret|key|token)\s*[:=]\s*["'][^"']+["']`),
 				Recommendation: "Use environment variables or secret management systems",
-				Score:          -30,
+				Score:          -28,
 			},
 			// Insecure environment variables
 			{
@@ -89,7 +89,7 @@ func NewClassCDetector() *ClassCDetector {
 				Description:    "Secrets exported in shell scripts",
 				Pattern:        regexp.MustCompile(`(?i)^\s*export\s+(SECRET|TOKEN|PASSWORD|API_KEY|PRIVATE_KEY|AWS_SECRET)`),
 				Recommendation: "Load secrets at runtime from secure storage; never export in scripts",
-				Score:          -20,
+				Score:          -18,
 			},
 			// Missing security headers
 			{
@@ -99,7 +99,7 @@ func NewClassCDetector() *ClassCDetector {
 				Description:    "Security headers not configured",
 				Pattern:        regexp.MustCompile(`(?i)(app\.use\s*\(\s*helmet|app\.use\s*\(\s*security|header\s*\(\s*["']X-Frame-Options|Content-Security-Policy)`),
 				Recommendation: "Implement CSP, X-Frame-Options, X-Content-Type-Options, HSTS headers",
-				Score:          -15,
+				Score:          -10,
 			},
 			// CORS wildcard
 			{
@@ -109,7 +109,7 @@ func NewClassCDetector() *ClassCDetector {
 				Description:    "Overly permissive CORS policy",
 				Pattern:        regexp.MustCompile(`(?i)(Access-Control-Allow-Origin.*\*|cors\s*\(\s*\{.*origin.*\*|res\.header\s*\(\s*["']Access-Control-Allow-Origin["']\s*,\s*["']\*["']\s*\))`),
 				Recommendation: "Restrict CORS to specific trusted domains",
-				Score:          -15,
+				Score:          -12,
 			},
 		},
 	}

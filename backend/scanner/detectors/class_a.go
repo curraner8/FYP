@@ -39,7 +39,7 @@ func NewClassADetector() *ClassADetector {
 				Description:    "XSS via unsafe DOM manipulation",
 				Pattern:        regexp.MustCompile(`(?i)(innerHTML|outerHTML|document\.write|dangerouslySetInnerHTML|eval\(|setAttribute.*href).*(request|input|params|user|req\.|query)`),
 				Recommendation: "Use textContent instead of innerHTML, or sanitize.",
-				Score:          -20,
+				Score:          -19,
 			},
 			// Command Injection
 			{
@@ -50,7 +50,7 @@ func NewClassADetector() *ClassADetector {
 				// Pattern:        regexp.MustCompile(`(?i)(os\.system|subprocess\.call|subprocess\.run|exec|popen|Runtime\.exec|ProcessBuilder).*[\+|%s].*(request|input|params|args|req\.|user)`),
 				Pattern:        regexp.MustCompile(`(?is)(os\.system|subprocess\.call|subprocess\.run|exec|popen|Runtime\.exec|ProcessBuilder).*[\+|%s].*(request|input|params|args|req\.|user)`),
 				Recommendation: "Use subprocess.run(['cmd', 'arg'], shell=False) with argument list",
-				Score:          -30,
+				Score:          -28,
 			},
 			// LDAP Injection
 			{
@@ -61,7 +61,7 @@ func NewClassADetector() *ClassADetector {
 				// Pattern:        regexp.MustCompile(`(?i)(ldap|LDAP).*[\+|%s].*(request|input|params|user|req\.|username)`),
 				Pattern:        regexp.MustCompile(`(?i)\((uid|cn|mail|userpassword)[^)]*\+[^)]*(request|input|params|user|username)`),
 				Recommendation: "Use parameterized LDAP queries and escape special characters",
-				Score:          -20,
+				Score:          -17,
 			},
 			// XPath Injection
 			{
@@ -73,7 +73,7 @@ func NewClassADetector() *ClassADetector {
 				// Pattern:        regexp.MustCompile(`(?is)(xpath|selectNodes|evaluate|selectSingleNode).*?(\+|%s|['"]).*?(request|input|params|user|req\.)`),
 				Pattern:        regexp.MustCompile(`(?is)(["'].*\+.*(request|input|params|user|req\.|body|data).*["']|xpath\.(evaluate|selectNodes|selectSingleNode|compile))`),
 				Recommendation: "Use parameterized XPath queries or XPath variable bindings",
-				Score:          -20,
+				Score:          -16,
 			},
 			// CRLF Injection
 			{
@@ -84,7 +84,7 @@ func NewClassADetector() *ClassADetector {
 				// Pattern:        regexp.MustCompile(`(?i)(setHeader|addHeader|writeHead).*[\+|%s].*(request|input|params|user|req\.)`),
 				Pattern:        regexp.MustCompile(`(?is)(setHeader|addHeader|writeHead).*?(\+|%s).*?(request|input|params|user|req\.)`),
 				Recommendation: "Strip '\\r\\n' characters and validate header values",
-				Score:          -20,
+				Score:          -15,
 			},
 			// Eval Injection
 			{
@@ -105,7 +105,7 @@ func NewClassADetector() *ClassADetector {
 				// Pattern:        regexp.MustCompile(`(?i)(include|require|require_once|import|importlib|load|include_once).*\$_(GET|POST|REQUEST|input|params|req\.)`),
 				Pattern:        regexp.MustCompile(`(?is)(include|require|require_once|include_once|import|importlib\.import_module|load|System\.load|Class\.forName|Runtime\.exec)\s*\(?.*(request|input|params|user|req\.|body|data|\$_(GET|POST|REQUEST))`),
 				Recommendation: "Use strict whitelisting of allowed modules and files",
-				Score:          -30,
+				Score:          -26,
 			},
 			// PHP RFI
 			{
@@ -115,17 +115,18 @@ func NewClassADetector() *ClassADetector {
 				Description:    "Remote file inclusion detected",
 				Pattern:        regexp.MustCompile(`(?i)(include|require).*(http://|https://|ftp://)`),
 				Recommendation: "Use local files only",
-				Score:          -30,
+				Score:          -25,
 			},
 			// Path Traversal
 			{
-				ID:             "A10",
-				Type:           "PATH_TRAVERSAL",
-				Severity:       "high",
-				Description:    "Path traversal vulnerability",
-				Pattern:        regexp.MustCompile(`(?i)(open|readFile|sendFile|createReadStream|cat|type).*[\+|%s].*(\.\./|\.\.\\|/\.\.|\\\.\.)`),
+				ID:          "A10",
+				Type:        "PATH_TRAVERSAL",
+				Severity:    "high",
+				Description: "Path traversal vulnerability",
+				//Pattern:        regexp.MustCompile(`(?i)(open|readFile|sendFile|createReadStream|cat|type).*(\+|%s).*(\.\./|\.\.\\|/\.\.|\\\.\.)`),
+				Pattern:        regexp.MustCompile(`(?is)(open|readFile|sendFile|createReadStream|cat|type)\s*\(?.*(\+|%s)?.*(\.\./|\.\.\\|/\.\.|\\\.\.|request|input|params|user|req\.)`),
 				Recommendation: "Normalize paths and validate input",
-				Score:          -20,
+				Score:          -18,
 			},
 			// Hardcoded Credentials
 			{
@@ -135,7 +136,7 @@ func NewClassADetector() *ClassADetector {
 				Description:    "Hardcoded credentials in source code",
 				Pattern:        regexp.MustCompile(`(?i)(password|passwd|secret|api_key|apikey|token|auth_token|aws_access_key_id|aws_secret_access_key|private_key)\s*[:=]\s*["'][^"']{4,}["']`),
 				Recommendation: "Use environment variables or secret management",
-				Score:          -20,
+				Score:          -16,
 			},
 			// Sensitive Info in Comments
 			{
@@ -145,35 +146,38 @@ func NewClassADetector() *ClassADetector {
 				Description:    "Sensitive information disclosed in comments",
 				Pattern:        regexp.MustCompile(`(?i)(//|#|/\*|\*).*?(password|secret|key|token|todo|fixme|hack|bypass|backdoor|admin|root)`),
 				Recommendation: "Remove sensitive information from comments before committing",
-				Score:          -10,
+				Score:          -8,
 			},
 			// Debug Code Enabled
 			{
-				ID:             "A13",
-				Type:           "DEBUG_ENABLED",
-				Severity:       "medium",
-				Description:    "Debug mode or code left enabled",
-				Pattern:        regexp.MustCompile(`(?i)(DEBUG\s*=\s*True|debug\s*=\s*true|app\.debug\s*=\s*true|console\.log\(|printStackTrace|debugger;)`),
+				ID:          "A13",
+				Type:        "DEBUG_ENABLED",
+				Severity:    "medium",
+				Description: "Debug mode or code left enabled",
+				// Pattern:        regexp.MustCompile(`(?i)(DEBUG\s*=\s*True|debug\s*=\s*true|app\.debug\s*=\s*true|console\.log\(|printStackTrace|debugger;)`),
+				Pattern:        regexp.MustCompile(`(?i)(\b\w*debug\w*\b\s*(:=|=)\s*true|console\.log\s*\(|fmt\.Println\s*\(|printStackTrace\s*\(|debugger;)`),
 				Recommendation: "Disable debug mode in production. Remove console.log statements",
-				Score:          -10,
+				Score:          -9,
 			},
 			// Logging Secrets
 			{
-				ID:             "A14",
-				Type:           "LOGGED_SECRETS",
-				Severity:       "high",
-				Description:    "Sensitive information logged",
-				Pattern:        regexp.MustCompile(`(?i)(log|logger|console\.log|print|printf|syslog).*(password|secret|token|key|credential|auth)`),
+				ID:          "A14",
+				Type:        "LOGGED_SECRETS",
+				Severity:    "high",
+				Description: "Sensitive information logged",
+				// Pattern:        regexp.MustCompile(`(?i)(log|logger|console\.log|print|printf|syslog).*(password|secret|token|key|credential|auth)`),
+				Pattern:        regexp.MustCompile(`(?i)(\b(log|logger|console\.log|print|printf|syslog)\b).*?(password|secret|token|api[_-]?key|auth[_-]?token|credential)`),
 				Recommendation: "Log identifiers only, Never credentials or secrets",
-				Score:          -20,
+				Score:          -15,
 			},
 			// Stack Traces Exposed
 			{
-				ID:             "A15",
-				Type:           "STACK_TRACE_EXPOSED",
-				Severity:       "medium",
-				Description:    "Stack trace printing in production code",
-				Pattern:        regexp.MustCompile(`(?i)(printStackTrace|traceback\.print_exc|traceback\.format_exc|console\.error\(.*error.*stack)`),
+				ID:          "A15",
+				Type:        "STACK_TRACE_EXPOSED",
+				Severity:    "medium",
+				Description: "Stack trace printing in production code",
+				// Pattern:        regexp.MustCompile(`(?i)(printStackTrace|traceback\.print_exc|traceback\.format_exc|console\.error\(.*error.*stack)`),
+				Pattern:        regexp.MustCompile(`(?is)(printStackTrace|traceback\.print_exc|traceback\.format_exc|console\.error\s*\(.*?stack|error\.stack)`),
 				Recommendation: "Use generic error messages and log details server-side only",
 				Score:          -10,
 			},
@@ -190,38 +194,6 @@ func NewClassADetector() *ClassADetector {
 		},
 	}
 }
-
-// func (d *ClassADetector) Detect(filename, content string) []models.Finding {
-// 	var findings []models.Finding
-// 	lines := getLines(content)
-
-// 	for _, rule := range d.rules {
-// 		for lineNum, line := range lines {
-// 			if rule.Pattern.MatchString(line) {
-// 				// Avoid duplicates on same line for same rule
-// 				snippet := strings.TrimSpace(line)
-// 				if len(snippet) > 100 {
-// 					snippet = snippet[:100] + "..."
-// 				}
-
-// 				findings = append(findings, models.Finding{
-// 					ID:             rule.ID,
-// 					Class:          d.class,
-// 					Type:           rule.Type,
-// 					Description:    rule.Description,
-// 					Line:           lineNum + 1,
-// 					Snippet:        snippet,
-// 					Recommendation: rule.Recommendation,
-// 					Severity:       rule.Severity,
-// 					Confidence:     "high",
-// 					ScoreImpact:    rule.Score,
-// 				})
-// 			}
-// 		}
-// 	}
-
-// 	return findings
-// }
 
 func (d *ClassADetector) Detect(filename, content string) []models.Finding {
 	var findings []models.Finding

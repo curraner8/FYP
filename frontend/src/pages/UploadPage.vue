@@ -11,47 +11,77 @@
       <q-card flat class="glass-card q-mb-sm">
         <q-card-section class="q-py-md">
           <div class="row items-center justify-between">
-            <div class="section-label text-grey-8 uppercase">Enter Code Below</div>
-            <q-btn flat dense @click="$router.push('/upload')" class="upload-toggle-btn">
-              Upload Files
-            </q-btn>
+            <div class="section-label text-grey-8 uppercase">Upload Files</div>
+            <q-btn flat dense @click="$router.push('/')" class="nav-btn"> Enter Text </q-btn>
           </div>
         </q-card-section>
       </q-card>
 
-      <q-card flat class="editor-card shadow-20 q-mb-lg">
+      <!-- Drop Zone -->
+      <q-card flat class="upload-card q-mb-lg">
         <q-card-section class="q-pa-none">
-          <div class="row border-bottom q-pa-sm bg-grey-3 items-center">
-            <q-input
-              v-model="filename"
-              dense
-              borderless
-              placeholder="filename.js"
-              class="q-ml-md text-grey-7"
-              input-style="font-family: 'IBM Plex Mono', monospace"
+          <div
+            class="drop-zone flex flex-center column"
+            :class="{ 'drop-zone--active': isDragging }"
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="onDrop"
+            @click="$refs.fileInput.click()"
+          >
+            <div class="drop-title">Drop files here</div>
+            <div class="drop-sub q-mt-xs">or click to browse</div>
+            <div class="drop-hint q-mt-sm">.py · .js · .jsx · .ts · .tsx · .html · .java</div>
+            <input
+              ref="fileInput"
+              type="file"
+              multiple
+              accept=".py,.js,.jsx,.ts,.tsx,.html,.java"
+              style="display: none"
+              @change="onFileInput"
             />
           </div>
-          <q-input
-            v-model="code"
-            type="textarea"
-            borderless
-            placeholder="// Paste your source code here..."
-            rows="15"
-            class="code-input q-pa-md"
-            input-style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 1.7; color: #333;"
-          />
         </q-card-section>
       </q-card>
+
+      <!-- Queued Files -->
+      <div v-if="uploadedFiles.length" class="q-mb-lg">
+        <div class="section-label text-grey-6 q-mb-sm">
+          QUEUED FILES ({{ uploadedFiles.length }})
+        </div>
+        <q-card flat class="file-list-card">
+          <q-list separator>
+            <q-item v-for="(f, i) in uploadedFiles" :key="i" class="file-item">
+              <q-item-section>
+                <q-item-label class="file-name">{{ f.name }}</q-item-label>
+                <q-item-label caption class="file-size">{{ formatSize(f.size) }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="close"
+                  size="sm"
+                  color="grey-5"
+                  @click="removeFile(i)"
+                />
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card>
+      </div>
 
       <q-btn
         unelevated
-        @click="scanCode"
+        @click="scanFiles"
         :loading="loading"
+        :disable="!uploadedFiles.length"
         class="detect-btn full-width q-py-md text-weight-bold"
       >
         <span class="q-mr-sm">RUN DETECTION</span>
       </q-btn>
 
+      <!-- Results -->
       <transition appear enter-active-class="animated fadeInUp">
         <div v-if="result" class="q-mt-xl">
           <div class="row q-col-gutter-lg q-mb-lg">
@@ -88,6 +118,7 @@
           </div>
 
           <div v-for="file in result.files" :key="file.file">
+            <div class="file-group-label q-mb-sm q-mt-lg">{{ file.file }}</div>
             <q-card
               v-for="(finding, idx) in file.findings"
               :key="idx"
@@ -97,7 +128,7 @@
             >
               <q-card-section>
                 <div class="row justify-between items-center q-mb-md">
-                  <div class="row items-center no-wrap q-gutter-sm">
+                  <div class="row justify-center no-wrap q-gutter-sm">
                     <div class="finding-title">{{ finding.type }}</div>
                     <span v-if="isDismissed(file.file, idx)" class="dismissed-tag">DISMISSED</span>
                   </div>
@@ -190,30 +221,96 @@
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.editor-card {
-  border-radius: 5px 5px 25px 25px;
-  background: white;
-  overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.code-input {
-  background: #fafafa;
-}
-
-.upload-toggle-btn {
+.nav-btn {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
   letter-spacing: 1.5px;
   color: #1a1a1a;
   border-radius: 10px;
   padding: 6px 12px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   transition: all 0.2s;
   &:hover {
     color: #333;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.08);
   }
+}
+
+.upload-card {
+  border-radius: 5px 5px 25px 25px;
+  background: white;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.drop-zone {
+  min-height: 280px;
+  cursor: pointer;
+  border: 2px dashed #ddd;
+  border-radius: 5px 5px 25px 25px;
+  transition: all 0.2s ease;
+  padding: 40px;
+
+  &:hover,
+  &.drop-zone--active {
+    border-color: #aaa;
+    background: #f5f5f5;
+  }
+}
+
+.drop-icon {
+  color: #ccc;
+  transition: color 0.2s;
+  .drop-zone:hover &,
+  .drop-zone--active & {
+    color: #999;
+  }
+}
+
+.drop-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #555;
+}
+
+.drop-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #aaa;
+}
+
+.drop-hint {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: #ccc;
+  text-transform: uppercase;
+}
+
+/* ── File List ── */
+.file-list-card {
+  border-radius: 20px;
+  background: white;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 4px 4px 10px #e8e8e8;
+}
+
+.file-item {
+  padding: 10px 16px;
+}
+
+.file-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  color: #333;
+}
+
+.file-size {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #aaa;
 }
 
 .detect-btn {
@@ -233,6 +330,7 @@
   }
 }
 
+/* ── Results ── */
 .result-stat-card {
   border-radius: 25px;
   background: white;
@@ -268,6 +366,16 @@
 .stat-num {
   font-family: 'Syne', sans-serif;
   font-weight: 700;
+}
+
+.file-group-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: white;
+  border-left: 3px solid #ddd;
+  padding-left: 10px;
 }
 
 .finding-card {
@@ -340,10 +448,6 @@
   line-height: 1.6;
 }
 
-.border-bottom {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
 .finding-card--dismissed {
   opacity: 0.45;
   background: #f7f7f7;
@@ -395,8 +499,8 @@ import { useDismiss } from './useDismiss'
 
 export default {
   setup() {
-    const filename = ref('app.js')
-    const code = ref('')
+    const uploadedFiles = ref([])
+    const isDragging = ref(false)
     const result = ref(null)
     const {
       isDismissed,
@@ -409,14 +513,50 @@ export default {
     } = useDismiss(result)
     const loading = ref(false)
 
-    const scanCode = async () => {
-      if (!code.value) return
+    const addFiles = (files) => {
+      const allowed = ['.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.java']
+      for (const f of files) {
+        const ext = '.' + f.name.split('.').pop().toLowerCase()
+        if (allowed.includes(ext) && !uploadedFiles.value.find((u) => u.name === f.name)) {
+          uploadedFiles.value.push(f)
+        }
+      }
+    }
+
+    const onFileInput = (e) => addFiles(Array.from(e.target.files))
+    const onDrop = (e) => {
+      isDragging.value = false
+      addFiles(Array.from(e.dataTransfer.files))
+    }
+    const removeFile = (i) => uploadedFiles.value.splice(i, 1)
+
+    const formatSize = (bytes) => {
+      if (bytes < 1024) return bytes + ' B'
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+    }
+
+    const readFile = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (e) => resolve(e.target.result)
+        reader.onerror = reject
+        reader.readAsText(file)
+      })
+
+    const scanFiles = async () => {
+      if (!uploadedFiles.value.length) return
       loading.value = true
+      result.value = null
       resetDismissed()
       try {
-        const response = await axios.post('http://localhost:8080/scan', {
-          files: [{ path: filename.value, content: code.value }],
-        })
+        const filePayloads = await Promise.all(
+          uploadedFiles.value.map(async (f) => ({
+            path: f.name,
+            content: await readFile(f),
+          })),
+        )
+        const response = await axios.post('http://localhost:8080/scan', { files: filePayloads })
         result.value = response.data
       } catch (error) {
         console.error(error)
@@ -438,19 +578,23 @@ export default {
     }
 
     return {
-      filename,
-      code,
+      uploadedFiles,
+      isDragging,
       result,
       loading,
-      scanCode,
+      onFileInput,
+      onDrop,
+      removeFile,
+      formatSize,
+      scanFiles,
+      getSeverityColor,
+      getGradeColor,
       isDismissed,
       dismiss,
       undoDismiss,
       computedScore,
       computedGrade,
       activeCount,
-      getSeverityColor,
-      getGradeColor,
     }
   },
 }

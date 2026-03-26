@@ -28,7 +28,7 @@ func NewClassDDetector() *ClassDDetector {
 			// 	Description:    "Rout without explicit aithorization check",
 			// 	Pattern:        regexp.MustCompile(`(?i)(@app\.route|router\.(get|post|put|delete)|app\.(get|post|put|delete)|server\.(get|post)).{0,100}(?![\s\S]{0,500}?(login_required|auth|authorize|permission|jwt|verify|check.*auth|require.*auth))`),
 			// 	Recommendation: "Add authentication middleware",
-			// 	Score:          -20,
+			// 	Score:          -18,
 			// },
 			// IDOR Pattern
 			{
@@ -38,7 +38,7 @@ func NewClassDDetector() *ClassDDetector {
 				Description:    "Direct object reference without ownership check",
 				Pattern:        regexp.MustCompile(`(?i)(WHERE\s+(id|user_id|account_id|order_id)\s*=\s*(request|params|req\.|input|body|args))`),
 				Recommendation: "Verify the user owns the resource before accessing",
-				Score:          -20,
+				Score:          -15,
 			},
 			// Forced Browsing
 			// ****CAUSES ERROR****
@@ -49,7 +49,7 @@ func NewClassDDetector() *ClassDDetector {
 			// 	Description:    "Sensitive endpoint may lack protection",
 			// 	Pattern:        regexp.MustCompile(`(?i)(@app\.route|router\.|app\.(get|post)).*(admin|internal|debug|test|backup|config|secret|api/v[0-9]+)`),
 			// 	Recommendation: "Verify authentication and authorization on sensitive routes",
-			// 	Score:          -15,
+			// 	Score:          -12,
 			// },
 			// CSRF risk
 			// ****CAUSES ERROR****
@@ -60,7 +60,7 @@ func NewClassDDetector() *ClassDDetector {
 			// 	Description:    "State-changing operation without CSRF protection",
 			// 	Pattern:        regexp.MustCompile(`(?i)(@app\.route.*methods.*POST|router\.post|app\.post).{0,200}(?![\s\S]{0,200}?(csrf|csrf_token|csrf_exempt|sameSite|_csrf))`),
 			// 	Recommendation: "Add CSRF tokens",
-			// 	Score:          -20,
+			// 	Score:          -16,
 			// },
 			// Open redirect
 			{
@@ -70,7 +70,7 @@ func NewClassDDetector() *ClassDDetector {
 				Description:    "Potential open redirect",
 				Pattern:        regexp.MustCompile(`(?i)(redirect|res\.redirect|location\.href|window\.location).*\(.*(request|params|req\.|query|input|next|url|return_url)`),
 				Recommendation: "Validate redirect URLs against whitelist",
-				Score:          -15,
+				Score:          -7,
 			},
 			// SSRF Indicator
 			{
@@ -80,7 +80,7 @@ func NewClassDDetector() *ClassDDetector {
 				Description:    "Server-side request with user-controlled URL",
 				Pattern:        regexp.MustCompile(`(?i)(requests\.(get|post)|http\.(get|request)|fetch|axios\.(get|post)|urllib\.request).*\(.*(request|params|req\.|input|url|target|endpoint)`),
 				Recommendation: "Validate URL scheme and host; block internal IP ranges",
-				Score:          -20,
+				Score:          -16,
 			},
 			// Client-side security
 			// ****CAUSES ERROR****
@@ -91,7 +91,7 @@ func NewClassDDetector() *ClassDDetector {
 			// 	Description:    "Security check performed client-side only",
 			// 	Pattern:        regexp.MustCompile(`(?i)(if\s*\(.*(role|admin|permission|auth).*\)|disabled\s*=\s*{(?!.*server).*|hidden\s*=\s*{).*(show|display|enable|render|visible)`),
 			// 	Recommendation: "Move all security checks to server-side; client-side is bypassable",
-			// 	Score:          -20,
+			// 	Score:          -18,
 			// },
 			// Sensitive data in GET
 			{
@@ -101,7 +101,7 @@ func NewClassDDetector() *ClassDDetector {
 				Description:    "Sensitive data in GET request",
 				Pattern:        regexp.MustCompile(`(?i)(\?|&)(password|token|secret|api_key|credit_card|ssn)=`),
 				Recommendation: "Use POST requests with body for sensitive data",
-				Score:          -15,
+				Score:          -6,
 			},
 			// Direct user ID usage
 			{
@@ -111,7 +111,7 @@ func NewClassDDetector() *ClassDDetector {
 				Description:    "User ID from request used directly in query",
 				Pattern:        regexp.MustCompile(`(?i)(user_id|account_id|owner_id)\s*=\s*(request|params|req\.|args|input|body)\[`),
 				Recommendation: "Use session-derived user_id instead of request params",
-				Score:          -20,
+				Score:          -15,
 			},
 		},
 	}
