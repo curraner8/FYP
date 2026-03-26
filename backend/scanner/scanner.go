@@ -2,8 +2,8 @@ package scanner
 
 import (
 	"FYP/backend/models"
+	"FYP/backend/scanner/detectors"
 	"path/filepath"
-	"strings"
 )
 
 var SupportedExtensions = map[string]bool{
@@ -13,6 +13,16 @@ var SupportedExtensions = map[string]bool{
 	".ts":   true,
 	".tsx":  true,
 	".html": true,
+	".java": true,
+}
+
+var Detectors = []detectors.Detector{
+	detectors.NewClassADetector(),
+	detectors.NewClassBDetector(),
+	detectors.NewClassCDetector(),
+	detectors.NewClassDDetector(),
+	detectors.NewClassEDetector(),
+	detectors.NewClassFDetector(),
 }
 
 func ScanContent(filename, content string) []models.Finding {
@@ -23,24 +33,10 @@ func ScanContent(filename, content string) []models.Finding {
 		return findings
 	}
 
-	lines := strings.Split(content, "\n")
-
-	for _, rule := range Rules {
-		for lineNum, line := range lines {
-			if rule.Pattern.MatchString(line) {
-				findings = append(findings, models.Finding{
-					ID:             rule.ID,
-					Type:           rule.Type,
-					Description:    rule.Description,
-					Line:           lineNum + 1,
-					Snippet:        strings.TrimSpace(line),
-					Recommendation: rule.Recommendation,
-					Severity:       rule.Severity,
-				})
-			}
-		}
+	for _, detector := range Detectors {
+		results := detector.Detect(filename, content)
+		findings = append(findings, results...)
 	}
-
 	return findings
 }
 
@@ -48,11 +44,13 @@ func ScanFiles(files []struct {
 	Path    string `json:"path"`
 	Content string `json:"content"`
 }) models.ScanResult {
+
 	var allFindings []models.Finding
 	var fileResults []models.FileResult
 
 	for _, file := range files {
 		findings := ScanContent(file.Path, file.Content)
+
 		if len(findings) > 0 {
 			fileResults = append(fileResults, models.FileResult{
 				File:     file.Path,
@@ -70,7 +68,7 @@ func ScanFiles(files []struct {
 		Grade: grade,
 		Summary: models.Summary{
 			TotalFiles:      len(files),
-			FilesWithIssues: len(fileResults),
+			FilesWithIssues: len(allFindings),
 			ScoreBreakdown:  breakdown,
 		},
 	}
