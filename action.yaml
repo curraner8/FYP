@@ -1,0 +1,29 @@
+name: "Web Vulnerability Scanner"
+description: "Scans source code for security vulnerabilities and generates a report with fix recommendations"
+author: "Sean Curran"
+
+inputs:
+  scan-path:
+    description: "Path to scan"
+    required: false
+    default: "."
+  fail-on-grade:
+    description: "Fail the action if score falls below this grade (A/B/C/D/E/F)"
+    required: false
+    default: "D"
+
+outputs:
+  score:
+    description: "Numerical security score (0-100)"
+  grade:
+    description: "Letter grade (A-F)"
+  report:
+    description: "Full JSON scan report"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  env:
+    GROQ_API_KEY: ${{ inputs.groq-api-key }}
+  args:
+    - ${{ inputs.scan-path }}
