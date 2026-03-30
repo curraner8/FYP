@@ -78,7 +78,8 @@ func main() {
 			defer f.Close()
 			fmt.Fprintf(f, "score=%d\n", result.Score)
 			fmt.Fprintf(f, "grade=%s\n", result.Grade)
-			fmt.Fprintf(f, "report=%s\n", string(output))
+
+			fmt.Fprintf(f, "report<<EOF\n%s\nEOF\n", string(output))
 		}
 	}
 
