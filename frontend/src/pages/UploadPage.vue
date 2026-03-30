@@ -171,6 +171,18 @@
                   <div class="remedy-title">FIX RECOMMENDATION</div>
                   <div class="remedy-body">{{ finding.recommendation }}</div>
                 </div>
+
+                <div v-if="finding.llm_fix" class="ai-remedy-banner q-pa-md q-mt-md">
+                  <div class="row items-center q-mb-sm">
+                    <div class="ai-remedy-title">AI FIX RECOMMENDATION</div>
+                  </div>
+
+                  <div class="ai-code-wrapper q-mb-sm">
+                    <pre><code>{{ finding.llm_fix }}</code></pre>
+                  </div>
+
+                  <div class="ai-remedy-explanation">{{ finding.llm_explanation }}</div>
+                </div>
               </q-card-section>
             </q-card>
           </div>
@@ -489,6 +501,45 @@
     color: #fff;
     background: #81c784;
   }
+}
+
+.ai-remedy-banner {
+  background: #f0f4ff;
+  border-radius: 12px;
+  border-left: 6px solid #5c6bc0;
+}
+
+.ai-remedy-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #3f51b5;
+  text-transform: uppercase;
+}
+
+.ai-code-wrapper {
+  background: #282c34;
+  color: #abb2bf;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  overflow-x: auto;
+
+  pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}
+
+.ai-remedy-explanation {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  color: #3f4756;
+  line-height: 1.6;
+  font-style: italic;
 }
 </style>
 

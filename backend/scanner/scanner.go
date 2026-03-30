@@ -14,6 +14,7 @@ var SupportedExtensions = map[string]bool{
 	".tsx":  true,
 	".html": true,
 	".java": true,
+	".go":   true,
 }
 
 var Detectors = []detectors.Detector{
@@ -50,6 +51,17 @@ func ScanFiles(files []struct {
 
 	for _, file := range files {
 		findings := ScanContent(file.Path, file.Content)
+
+		for i := range findings {
+			ext := filepath.Ext(file.Path)
+
+			// call Groq API
+			fix, explanation := GetLLMSuggestion(findings[i], ext)
+
+			// attach AI results to the finding
+			findings[i].LLMFix = fix
+			findings[i].LLMExplanation = explanation
+		}
 
 		if len(findings) > 0 {
 			fileResults = append(fileResults, models.FileResult{

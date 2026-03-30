@@ -11,6 +11,8 @@ type Finding struct {
 	Severity       string `json:"severity"`
 	Confidence     string `json:"confidence"`   // high/medium/low, class dependent (how accurately can this be detected)
 	ScoreImpact    int    `json:"score_impact"` // score value?
+	LLMFix         string `json:"llm_fix"`
+	LLMExplanation string `json:"llm_explanation"`
 }
 
 type FileResult struct {
