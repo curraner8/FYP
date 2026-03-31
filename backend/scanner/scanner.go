@@ -72,7 +72,7 @@ func ScanFiles(files []struct {
 		}
 	}
 
-	score, grade, breakdown := ComputeScore(allFindings)
+	score, grade, breakdown := ComputeScore(allFindings, len(files))
 
 	return models.ScanResult{
 		Files: fileResults,

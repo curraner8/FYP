@@ -30,12 +30,11 @@
           >
             <div class="drop-title">Drop files here</div>
             <div class="drop-sub q-mt-xs">or click to browse</div>
-            <div class="drop-hint q-mt-sm">.py · .js · .jsx · .ts · .tsx · .html · .java</div>
             <input
               ref="fileInput"
               type="file"
               multiple
-              accept=".py,.js,.jsx,.ts,.tsx,.html,.java"
+              accept=".py,.js,.jsx,.ts,.tsx,.html,.java, .go"
               style="display: none"
               @change="onFileInput"
             />
@@ -565,7 +564,7 @@ export default {
     const loading = ref(false)
 
     const addFiles = (files) => {
-      const allowed = ['.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.java']
+      const allowed = ['.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.java', '.go']
       for (const f of files) {
         const ext = '.' + f.name.split('.').pop().toLowerCase()
         if (allowed.includes(ext) && !uploadedFiles.value.find((u) => u.name === f.name)) {
@@ -598,7 +597,7 @@ export default {
     const scanFiles = async () => {
       if (!uploadedFiles.value.length) return
       loading.value = true
-      result.value = null
+      // result.value = null
       resetDismissed()
       try {
         const filePayloads = await Promise.all(

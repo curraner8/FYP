@@ -29,7 +29,6 @@ func NewClassADetector() *ClassADetector {
 				Pattern:        regexp.MustCompile(`(?i)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE).*(['"]).*(%|\.format\(|\+|f['"])`),
 				Recommendation: "Use parameterized queries",
 				Score:          -30,
-				// AST Research
 			},
 			// XSS (all variants)
 			{
