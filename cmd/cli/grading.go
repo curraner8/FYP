@@ -4,5 +4,5 @@ package main
 
 func shouldFail(actual, threshold string) bool {
 	order := map[string]int{"A": 6, "B": 5, "C": 4, "D": 3, "E": 2, "F": 1, "": 0}
-	return order[actual] < order[threshold]
+	return order[actual] <= order[threshold]
 }
