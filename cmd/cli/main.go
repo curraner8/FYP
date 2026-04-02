@@ -70,7 +70,7 @@ func main() {
 
 	fmt.Println(string(output))
 
-	// emit GitHub Action outputs (written to $GITHUB_OUTPUT)
+	// GitHub Action outputs (written to $GITHUB_OUTPUT)
 	githubOutput := os.Getenv("GITHUB_OUTPUT")
 	if githubOutput != "" {
 		f, err := os.OpenFile(githubOutput, os.O_APPEND|os.O_WRONLY, 0644)
@@ -83,18 +83,14 @@ func main() {
 		}
 	}
 
-	// fail the action based on grade threshold
+	writeGitHubSummary(result)
+
+	// fail based on threshold
 	failOnGrade := os.Getenv("FAIL_ON_GRADE")
 	if shouldFail(result.Grade, failOnGrade) {
-		fmt.Fprintf(os.Stderr, "\n Security scan failed: Grade %s is below threshold %s (Score: %d/100)\n", result.Grade, failOnGrade, result.Score)
+		fmt.Fprintf(os.Stderr, "\n --->SECURITY SCAN FAILED: Grade %s is below %s (%d/100)\n", result.Grade, failOnGrade, result.Score)
 		os.Exit(1)
 	}
 
-	fmt.Fprintf(os.Stderr, "\n Security scan passed: Grade %s (Score: %d/100)\n", result.Grade, result.Score)
-}
-
-// this function returns true if the actual grade is worse than the threshold
-func shouldFail(actual, threshold string) bool {
-	order := map[string]int{"A": 6, "B": 5, "C": 4, "D": 3, "E": 2, "F": 1, "": 0}
-	return order[actual] < order[threshold]
+	fmt.Fprintf(os.Stderr, "\n ---> SECURITY SCAN PASSED: Grade %s (%d/100)\n", result.Grade, result.Score)
 }

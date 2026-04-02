@@ -11,6 +11,10 @@ inputs:
     description: "Fail the action if score falls below this grade (A/B/C/D/E/F)"
     required: false
     default: "D"
+  groq-api-key:
+    description: "Groq API key for LLM fix suggestions"
+    required: false
+    default: ""
 
 outputs:
   score:
@@ -26,6 +30,5 @@ runs:
   env:
     GROQ_API_KEY: ${{ inputs.groq-api-key }}
     FAIL_ON_GRADE: ${{ inputs.fail-on-grade }}
-    SCAN_PATH: ${{ inputs.scan-path }}
   args:
     - ${{ inputs.scan-path }}
