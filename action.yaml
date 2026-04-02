@@ -21,8 +21,16 @@ outputs:
     description: "Numerical security score (0-100)"
   grade:
     description: "Letter grade (A-F)"
-  report:
-    description: "Full JSON scan report"
+  files_with_issues:
+    description: "Number of files with issues"
+  critical:
+    description: "Critical penalty points"
+  high:
+    description: "High penalty points"
+  medium:
+    description: "Medium penalty points"
+  low:
+    description: "Low penalty points"
 
 runs:
   using: "docker"

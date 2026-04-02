@@ -78,12 +78,13 @@ func main() {
 			defer f.Close()
 			fmt.Fprintf(f, "score=%d\n", result.Score)
 			fmt.Fprintf(f, "grade=%s\n", result.Grade)
-
-			fmt.Fprintf(f, "report<<EOF\n%s\nEOF\n", string(output))
+			fmt.Fprintf(f, "files_with_issues=%d\n", result.Summary.FilesWithIssues)
+			fmt.Fprintf(f, "critical=%d\n", result.Summary.ScoreBreakdown.Critical)
+			fmt.Fprintf(f, "high=%d\n", result.Summary.ScoreBreakdown.High)
+			fmt.Fprintf(f, "medium=%d\n", result.Summary.ScoreBreakdown.Medium)
+			fmt.Fprintf(f, "low=%d\n", result.Summary.ScoreBreakdown.Low)
 		}
 	}
-
-	writeGitHubSummary(result)
 
 	// fail based on threshold
 	failOnGrade := os.Getenv("FAIL_ON_GRADE")
