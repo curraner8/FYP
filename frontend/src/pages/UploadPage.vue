@@ -17,7 +17,7 @@
         </q-card-section>
       </q-card>
 
-      <!-- Drop Zone -->
+      <!-- zone for files to be dropped/selected -->
       <q-card flat class="upload-card q-mb-lg">
         <q-card-section class="q-pa-none">
           <div
@@ -42,7 +42,7 @@
         </q-card-section>
       </q-card>
 
-      <!-- Queued Files -->
+      <!-- show queued files (files dropped/selected) -->
       <div v-if="uploadedFiles.length" class="q-mb-lg">
         <div class="section-label text-grey-6 q-mb-sm">
           QUEUED FILES ({{ uploadedFiles.length }})
@@ -80,7 +80,7 @@
         <span class="q-mr-sm">RUN DETECTION</span>
       </q-btn>
 
-      <!-- Results -->
+      <!-- show results -->
       <transition appear enter-active-class="animated fadeInUp">
         <div v-if="result" class="q-mt-xl">
           <div class="row q-col-gutter-lg q-mb-lg">
@@ -89,11 +89,11 @@
                 <div class="stat-label">Security Grade</div>
                 <div
                   class="text-h2 text-weight-bolder grade-display"
-                  :class="`text-${getGradeColor(computedGrade)}`"
+                  :class="`text-${getGradeColor(result.grade)}`"
                 >
-                  {{ computedGrade }}
+                  {{ result.grade || 'N/A' }}
                 </div>
-                <div class="stat-sub">{{ computedScore }}/100</div>
+                <div class="stat-sub">{{ result.score ?? 0 }}/100</div>
               </q-card>
             </div>
             <div class="col-12 col-md-8">
@@ -101,13 +101,13 @@
                 <div class="row full-width text-center">
                   <div class="col-6">
                     <div class="text-h5 text-weight-bold stat-num">
-                      {{ result.summary.total_files }}
+                      {{ result.summary.total_files || uploadedFiles.length }}
                     </div>
                     <div class="stat-label">Files Checked</div>
                   </div>
                   <div class="col-6">
                     <div class="text-h5 text-weight-bold text-negative stat-num">
-                      {{ activeCount }}
+                      {{ totalIssues }}
                     </div>
                     <div class="stat-label">Issues Found</div>
                   </div>
@@ -127,37 +127,14 @@
             >
               <q-card-section>
                 <div class="row justify-between items-center q-mb-md">
-                  <div class="row justify-center no-wrap q-gutter-sm">
-                    <div class="finding-title">{{ finding.type }}</div>
-                    <span v-if="isDismissed(file.file, idx)" class="dismissed-tag">DISMISSED</span>
-                  </div>
-                  <div class="row items-center q-gutter-sm">
-                    <q-badge
-                      :color="getSeverityColor(finding.severity)"
-                      class="q-pa-sm severity-badge"
-                      rounded
-                    >
-                      {{ finding.severity }}
-                    </q-badge>
-                    <q-btn
-                      v-if="!isDismissed(file.file, idx)"
-                      flat
-                      dense
-                      size="sm"
-                      class="dismiss-btn"
-                      @click="dismiss(file.file, idx)"
-                      >Dismiss</q-btn
-                    >
-                    <q-btn
-                      v-else
-                      flat
-                      dense
-                      size="sm"
-                      class="undo-btn"
-                      @click="undoDismiss(file.file, idx)"
-                      >Undo</q-btn
-                    >
-                  </div>
+                  <div class="finding-title">{{ finding.type }}</div>
+                  <q-badge
+                    :color="getSeverityColor(finding.severity)"
+                    class="q-pa-sm severity-badge"
+                    rounded
+                  >
+                    {{ finding.severity }}
+                  </q-badge>
                 </div>
                 <div class="finding-desc q-mb-md">{{ finding.description }}</div>
 
@@ -299,7 +276,6 @@
   text-transform: uppercase;
 }
 
-/* ── File List ── */
 .file-list-card {
   border-radius: 20px;
   background: white;
@@ -341,7 +317,6 @@
   }
 }
 
-/* ── Results ── */
 .result-stat-card {
   border-radius: 25px;
   background: white;
@@ -459,49 +434,6 @@
   line-height: 1.6;
 }
 
-.finding-card--dismissed {
-  opacity: 0.45;
-  background: #f7f7f7;
-  box-shadow: none;
-  border: 1px dashed rgba(0, 0, 0, 0.08);
-}
-.dismissed-tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: #bbb;
-  background: #eee;
-  border-radius: 6px;
-  padding: 2px 8px;
-}
-.dismiss-btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: #aaa;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 3px 10px;
-  &:hover {
-    color: #555;
-    border-color: #bbb;
-    background: #f5f5f5;
-  }
-}
-.undo-btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: #81c784;
-  border: 1px solid #81c784;
-  border-radius: 8px;
-  padding: 3px 10px;
-  &:hover {
-    color: #fff;
-    background: #81c784;
-  }
-}
-
 .ai-remedy-banner {
   background: #f0f4ff;
   border-radius: 12px;
@@ -543,39 +475,18 @@
 </style>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import axios from 'axios'
-import { useDismiss } from './useDismiss'
 
 export default {
   setup() {
     const uploadedFiles = ref([])
     const isDragging = ref(false)
     const result = ref(null)
-    const {
-      isDismissed,
-      dismiss,
-      undoDismiss,
-      resetDismissed,
-      computedScore,
-      computedGrade,
-      activeCount,
-    } = useDismiss(result)
     const loading = ref(false)
 
     const addFiles = (files) => {
-      const allowed = [
-        '.py',
-        '.js',
-        '.jsx',
-        '.ts',
-        '.tsx',
-        '.html',
-        '.java',
-        '.go',
-        '.json',
-        '.txt',
-      ]
+      const allowed = ['.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.java', '.go', '.txt']
       for (const f of files) {
         const ext = '.' + f.name.split('.').pop().toLowerCase()
         if (allowed.includes(ext) && !uploadedFiles.value.find((u) => u.name === f.name)) {
@@ -608,8 +519,6 @@ export default {
     const scanFiles = async () => {
       if (!uploadedFiles.value.length) return
       loading.value = true
-      // result.value = null
-      resetDismissed()
       try {
         const filePayloads = await Promise.all(
           uploadedFiles.value.map(async (f) => ({
@@ -626,6 +535,11 @@ export default {
       }
     }
 
+    const totalIssues = computed(() => {
+      if (!result.value?.files) return 0
+      return result.value.files.reduce((acc, file) => acc + (file.findings?.length || 0), 0)
+    })
+
     const getSeverityColor = (sev) => {
       const s = sev.toLowerCase()
       if (s === 'critical') return 'red-9'
@@ -634,7 +548,14 @@ export default {
     }
 
     const getGradeColor = (grade) => {
-      const colors = { A: 'green-7', B: 'light-green-7', C: 'orange-7', D: 'red-7' }
+      const colors = {
+        A: 'green-7',
+        B: 'light-green-7',
+        C: 'orange-7',
+        D: 'red-7',
+        E: 'red-9',
+        F: 'black',
+      }
       return colors[grade] || 'grey-7'
     }
 
@@ -650,12 +571,7 @@ export default {
       scanFiles,
       getSeverityColor,
       getGradeColor,
-      isDismissed,
-      dismiss,
-      undoDismiss,
-      computedScore,
-      computedGrade,
-      activeCount,
+      totalIssues,
     }
   },
 }

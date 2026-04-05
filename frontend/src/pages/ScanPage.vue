@@ -26,7 +26,7 @@
               v-model="filename"
               dense
               borderless
-              placeholder="filename.js"
+              placeholder="Enter filename"
               class="q-ml-md text-grey-7"
               input-style="font-family: 'IBM Plex Mono', monospace"
             />
@@ -60,11 +60,11 @@
                 <div class="stat-label">Security Grade</div>
                 <div
                   class="text-h2 text-weight-bolder grade-display"
-                  :class="`text-${getGradeColor(computedGrade)}`"
+                  :class="`text-${getGradeColor(result.grade)}`"
                 >
-                  {{ computedGrade }}
+                  {{ result.grade }}
                 </div>
-                <div class="stat-sub">{{ computedScore }}/100</div>
+                <div class="stat-sub">{{ result.score }}/100</div>
               </q-card>
             </div>
             <div class="col-12 col-md-8">
@@ -78,7 +78,7 @@
                   </div>
                   <div class="col-6">
                     <div class="text-h5 text-weight-bold text-negative stat-num">
-                      {{ activeCount }}
+                      {{ totalIssues }}
                     </div>
                     <div class="stat-label">Issues Found</div>
                   </div>
@@ -93,41 +93,17 @@
               :key="idx"
               flat
               class="finding-card q-mb-md"
-              :class="{ 'finding-card--dismissed': isDismissed(file.file, idx) }"
             >
               <q-card-section>
                 <div class="row justify-between items-center q-mb-md">
-                  <div class="row items-center no-wrap q-gutter-sm">
-                    <div class="finding-title">{{ finding.type }}</div>
-                    <span v-if="isDismissed(file.file, idx)" class="dismissed-tag">DISMISSED</span>
-                  </div>
-                  <div class="row items-center q-gutter-sm">
-                    <q-badge
-                      :color="getSeverityColor(finding.severity)"
-                      class="q-pa-sm severity-badge"
-                      rounded
-                    >
-                      {{ finding.severity }}
-                    </q-badge>
-                    <q-btn
-                      v-if="!isDismissed(file.file, idx)"
-                      flat
-                      dense
-                      size="sm"
-                      class="dismiss-btn"
-                      @click="dismiss(file.file, idx)"
-                      >Dismiss</q-btn
-                    >
-                    <q-btn
-                      v-else
-                      flat
-                      dense
-                      size="sm"
-                      class="undo-btn"
-                      @click="undoDismiss(file.file, idx)"
-                      >Undo</q-btn
-                    >
-                  </div>
+                  <div class="finding-title">{{ finding.type }}</div>
+                  <q-badge
+                    :color="getSeverityColor(finding.severity)"
+                    class="q-pa-sm severity-badge"
+                    rounded
+                  >
+                    {{ finding.severity }}
+                  </q-badge>
                 </div>
                 <div class="finding-desc q-mb-md">{{ finding.description }}</div>
 
@@ -356,49 +332,6 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.finding-card--dismissed {
-  opacity: 0.45;
-  background: #f7f7f7;
-  box-shadow: none;
-  border: 1px dashed rgba(0, 0, 0, 0.08);
-}
-.dismissed-tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: #bbb;
-  background: #eee;
-  border-radius: 6px;
-  padding: 2px 8px;
-}
-.dismiss-btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: #aaa;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 3px 10px;
-  &:hover {
-    color: #555;
-    border-color: #bbb;
-    background: #f5f5f5;
-  }
-}
-.undo-btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: #81c784;
-  border: 1px solid #81c784;
-  border-radius: 8px;
-  padding: 3px 10px;
-  &:hover {
-    color: #fff;
-    background: #81c784;
-  }
-}
-
 .ai-remedy-banner {
   background: #f0f4ff;
   border-radius: 12px;
@@ -440,30 +373,19 @@
 </style>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import axios from 'axios'
-import { useDismiss } from './useDismiss'
 
 export default {
   setup() {
-    const filename = ref('app.js')
+    const filename = ref('Enter filename')
     const code = ref('')
     const result = ref(null)
-    const {
-      isDismissed,
-      dismiss,
-      undoDismiss,
-      resetDismissed,
-      computedScore,
-      computedGrade,
-      activeCount,
-    } = useDismiss(result)
     const loading = ref(false)
 
     const scanCode = async () => {
       if (!code.value) return
       loading.value = true
-      resetDismissed()
       try {
         const response = await axios.post('http://localhost:8080/scan', {
           files: [{ path: filename.value, content: code.value }],
@@ -476,6 +398,11 @@ export default {
       }
     }
 
+    const totalIssues = computed(() => {
+      if (!result.value?.files) return 0
+      return result.value.files.reduce((acc, file) => acc + (file.findings?.length || 0), 0)
+    })
+
     const getSeverityColor = (sev) => {
       const s = sev.toLowerCase()
       if (s === 'critical') return 'red-9'
@@ -484,7 +411,14 @@ export default {
     }
 
     const getGradeColor = (grade) => {
-      const colors = { A: 'green-7', B: 'light-green-7', C: 'orange-7', D: 'red-7' }
+      const colors = {
+        A: 'green-7',
+        B: 'light-green-7',
+        C: 'orange-7',
+        D: 'red-7',
+        E: 'red-9',
+        F: 'black',
+      }
       return colors[grade] || 'grey-7'
     }
 
@@ -494,12 +428,7 @@ export default {
       result,
       loading,
       scanCode,
-      isDismissed,
-      dismiss,
-      undoDismiss,
-      computedScore,
-      computedGrade,
-      activeCount,
+      totalIssues,
       getSeverityColor,
       getGradeColor,
     }
