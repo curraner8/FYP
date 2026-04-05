@@ -123,7 +123,6 @@
               :key="idx"
               flat
               class="finding-card q-mb-md"
-              :class="{ 'finding-card--dismissed': isDismissed(file.file, idx) }"
             >
               <q-card-section>
                 <div class="row justify-between items-center q-mb-md">
