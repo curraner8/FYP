@@ -34,7 +34,7 @@
               ref="fileInput"
               type="file"
               multiple
-              accept=".py,.js,.jsx,.ts,.tsx,.html,.java, .go"
+              accept=".py,.js,.jsx,.ts,.tsx,.html,.java,.go,.txt"
               style="display: none"
               @change="onFileInput"
             />
@@ -564,7 +564,18 @@ export default {
     const loading = ref(false)
 
     const addFiles = (files) => {
-      const allowed = ['.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.java', '.go']
+      const allowed = [
+        '.py',
+        '.js',
+        '.jsx',
+        '.ts',
+        '.tsx',
+        '.html',
+        '.java',
+        '.go',
+        '.json',
+        '.txt',
+      ]
       for (const f of files) {
         const ext = '.' + f.name.split('.').pop().toLowerCase()
         if (allowed.includes(ext) && !uploadedFiles.value.find((u) => u.name === f.name)) {

@@ -23,7 +23,7 @@ jobs:
           groq-api-key: ${{ secrets.GROQ_API_KEY }}
 
       - name: Print scan summary
-        if: always() # will run even if previous steps failed
+        if: always()
         run: |
           echo "Security Score: ${{ steps.scan.outputs.score }}"
           echo "Security Grade: ${{ steps.scan.outputs.grade }}"

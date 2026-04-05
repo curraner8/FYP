@@ -3,6 +3,7 @@ package scanner
 import (
 	"FYP/backend/models"
 	"FYP/backend/scanner/detectors"
+	"FYP/backend/scanner/detectors/class_e"
 	"path/filepath"
 )
 
@@ -15,6 +16,7 @@ var SupportedExtensions = map[string]bool{
 	".html": true,
 	".java": true,
 	".go":   true,
+	".txt":  true,
 }
 
 var Detectors = []detectors.Detector{
@@ -22,7 +24,7 @@ var Detectors = []detectors.Detector{
 	detectors.NewClassBDetector(),
 	detectors.NewClassCDetector(),
 	detectors.NewClassDDetector(),
-	detectors.NewClassEDetector(),
+	class_e.NewClassEDetector(),
 	detectors.NewClassFDetector(),
 }
 

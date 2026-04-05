@@ -25,18 +25,46 @@ func NewClassADetector() *ClassADetector {
 				Type:        "SQL_INJECTION",
 				Severity:    "critical",
 				Description: "SQL injection via string concatenation/format",
-				// Pattern:        regexp.MustCompile(`(?i)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE).*(%s|%d|\+)`),
-				Pattern:        regexp.MustCompile(`(?i)(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|TRUNCATE).*(['"]).*(%|\.format\(|\+|f['"])`),
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`SELECT\s+.+\s+FROM|` +
+					`INSERT\s+INTO|` +
+					`UPDATE\s+\w+\s+SET|` +
+					`DELETE\s+FROM|` +
+					`DROP\s+(TABLE|DATABASE)|` +
+					`UNION\s+(ALL\s+)?SELECT` +
+					`).*?(` +
+					`\+\s*\w|` +
+					`%[sd]\b|` +
+					`\.format\s*\(|` +
+					`f["']|` +
+					"`\\$\\{" +
+					`)`),
 				Recommendation: "Use parameterized queries",
 				Score:          -30,
 			},
 			// XSS (all variants)
 			{
-				ID:             "A2",
-				Type:           "XSS",
-				Severity:       "high",
-				Description:    "XSS via unsafe DOM manipulation",
-				Pattern:        regexp.MustCompile(`(?i)(innerHTML|outerHTML|document\.write|dangerouslySetInnerHTML|eval\(|setAttribute.*href).*(request|input|params|user|req\.|query)`),
+				ID:          "A2",
+				Type:        "XSS",
+				Severity:    "high",
+				Description: "XSS via unsafe DOM manipulation",
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`innerHTML\s*=|` +
+					`outerHTML\s*=|` +
+					`document\.write\s*\(|` +
+					`document\.writeln\s*\(|` +
+					`insertAdjacentHTML\s*\(|` +
+					`dangerouslySetInnerHTML\s*=|` +
+					`\.html\s*\(|` +
+					`setAttribute\s*\(\s*["']on|` +
+					`setAttribute\s*\(\s*["']href` +
+					`).*?(` +
+					`request\.|req\.|` +
+					`params\[|query\[|` +
+					`input|userInput|` +
+					`location\.(search|hash)|` +
+					`document\.cookie` +
+					`)`),
 				Recommendation: "Use textContent instead of innerHTML, or sanitize.",
 				Score:          -19,
 			},
@@ -46,8 +74,23 @@ func NewClassADetector() *ClassADetector {
 				Type:        "COMMAND_INJECTION",
 				Severity:    "critical",
 				Description: "Command injection via shell execution",
-				// Pattern:        regexp.MustCompile(`(?i)(os\.system|subprocess\.call|subprocess\.run|exec|popen|Runtime\.exec|ProcessBuilder).*[\+|%s].*(request|input|params|args|req\.|user)`),
-				Pattern:        regexp.MustCompile(`(?is)(os\.system|subprocess\.call|subprocess\.run|exec|popen|Runtime\.exec|ProcessBuilder).*[\+|%s].*(request|input|params|args|req\.|user)`),
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`os\.system\s*\(|` +
+					`subprocess\.(call|run|Popen)\s*\(|` +
+					`exec\s*\(|` +
+					`popen\s*\(|` +
+					`Runtime\.getRuntime\(\)\.exec|` +
+					`ProcessBuilder\s*\(|` +
+					`child_process\.(exec|spawn|execSync|spawnSync)\s*\(|` +
+					`exec\.Command\s*\(` +
+					`).*?(` +
+					`\+|` +
+					`%s|%v|` +
+					`\$\{|` +
+					`f["']` +
+					`).*?(` +
+					`request|input|params|args|req\.|user|cmd|command|query` +
+					`)`),
 				Recommendation: "Use subprocess.run(['cmd', 'arg'], shell=False) with argument list",
 				Score:          -28,
 			},
@@ -57,8 +100,13 @@ func NewClassADetector() *ClassADetector {
 				Type:        "LDAP_INJECTION",
 				Severity:    "high",
 				Description: "LDAP injection via string concatenation",
-				// Pattern:        regexp.MustCompile(`(?i)(ldap|LDAP).*[\+|%s].*(request|input|params|user|req\.|username)`),
-				Pattern:        regexp.MustCompile(`(?i)\((uid|cn|mail|userpassword)[^)]*\+[^)]*(request|input|params|user|username)`),
+				Pattern: regexp.MustCompile(`(?is)(` +
+					`ldap\.(search|bind|modify|add|delete)\s*\(|` +
+					`DirContext\.(search|bind)\s*\(|` +
+					`ldap_search\s*\(|` +
+					`\(\s*(uid|cn|mail|userPassword|sAMAccountName)` +
+					`[^)]{0,100}(\+|%s|%v|\.format\s*\(|f["'])` +
+					`).*?(request|input|params|user|username|req\.)`),
 				Recommendation: "Use parameterized LDAP queries and escape special characters",
 				Score:          -17,
 			},
@@ -68,9 +116,16 @@ func NewClassADetector() *ClassADetector {
 				Type:        "XPATH_INJECTION",
 				Severity:    "high",
 				Description: "XPath injection via string concatenation",
-				// Pattern:        regexp.MustCompile(`(?i)(xpath|selectNodes|evaluate|selectSingleNode).*[\+|%s|'"].*(request|input|params|user|req\.)`),
-				// Pattern:        regexp.MustCompile(`(?is)(xpath|selectNodes|evaluate|selectSingleNode).*?(\+|%s|['"]).*?(request|input|params|user|req\.)`),
-				Pattern:        regexp.MustCompile(`(?is)(["'].*\+.*(request|input|params|user|req\.|body|data).*["']|xpath\.(evaluate|selectNodes|selectSingleNode|compile))`),
+				Pattern: regexp.MustCompile(`(?is)(` +
+					`xpath\.(evaluate|selectNodes|selectSingleNode|compile)\s*\(|` +
+					`\.evaluate\s*\([^)]*["']\/\/|` +
+					`XPath\.compile\s*\(|` +
+					`etree\.(xpath|findall|find)\s*\(|` +
+					`selectNodes\s*\(|` +
+					`["'](\/\/|\.\/).*\+.*["']` +
+					`).{0,200}?(` +
+					`request|input|params|user|req\.|body|data` +
+					`)`),
 				Recommendation: "Use parameterized XPath queries or XPath variable bindings",
 				Score:          -16,
 			},
@@ -80,18 +135,30 @@ func NewClassADetector() *ClassADetector {
 				Type:        "CRLF_INJECTION",
 				Severity:    "high",
 				Description: "CRLF injection in HTTP headers",
-				// Pattern:        regexp.MustCompile(`(?i)(setHeader|addHeader|writeHead).*[\+|%s].*(request|input|params|user|req\.)`),
-				Pattern:        regexp.MustCompile(`(?is)(setHeader|addHeader|writeHead).*?(\+|%s).*?(request|input|params|user|req\.)`),
+				Pattern: regexp.MustCompile(`(?is)(` +
+					`(setHeader|addHeader)\s*\(|` +
+					`writeHead\s*\(|` +
+					`response\.headers\s*\[|` +
+					`w\.Header\(\)\.(Set|Add)\s*\(|` +
+					`header\s*\(\s*["']Location|` +
+					`res\.redirect\s*\(` +
+					`).{0,200}?(` +
+					`\+\s*\w|%s|%v|f["']|\$\{|` +
+					`\\r\\n|\\n|%0[aAdD]|%0d%0a` +
+					`).*?(request|input|params|user|req\.)`),
 				Recommendation: "Strip '\\r\\n' characters and validate header values",
 				Score:          -15,
 			},
 			// Eval Injection
 			{
-				ID:             "A7",
-				Type:           "EVAL_INJECTION",
-				Severity:       "critical",
-				Description:    "Dangerous use of eval() with user input",
-				Pattern:        regexp.MustCompile(`(?i)\beval\s*\(.*(request|input|params|user|req\.|data|body)`),
+				ID:          "A7",
+				Type:        "EVAL_INJECTION",
+				Severity:    "critical",
+				Description: "Dangerous use of eval() with user input",
+				Pattern: regexp.MustCompile(`(?is)\b(eval|exec)\s*\(.{0,200}?(` +
+					`request|input|params|user|req\.|data|body|` +
+					`argv|stdin|os\.environ|getenv` +
+					`)`),
 				Recommendation: "Remove eval() entirely and use JSON.parse or structured logic",
 				Score:          -30,
 			},
@@ -101,18 +168,34 @@ func NewClassADetector() *ClassADetector {
 				Type:        "STATIC_CODE_INJECTION",
 				Severity:    "critical",
 				Description: "Dynamic code inclusion with user input",
-				// Pattern:        regexp.MustCompile(`(?i)(include|require|require_once|import|importlib|load|include_once).*\$_(GET|POST|REQUEST|input|params|req\.)`),
-				Pattern:        regexp.MustCompile(`(?is)(include|require|require_once|include_once|import|importlib\.import_module|load|System\.load|Class\.forName|Runtime\.exec)\s*\(?.*(request|input|params|user|req\.|body|data|\$_(GET|POST|REQUEST))`),
+				Pattern: regexp.MustCompile(`(?is)(` +
+					`include\s*\(|` +
+					`require\s*\(|` +
+					`require_once\s*\(|` +
+					`include_once\s*\(|` +
+					`importlib\.import_module\s*\(|` +
+					`__import__\s*\(|` +
+					`System\.loadLibrary\s*\(|` +
+					`Class\.forName\s*\(` +
+					`).{0,150}?(` +
+					`request|input|params|user|req\.|body|data|\$_(GET|POST|REQUEST)` +
+					`)`),
 				Recommendation: "Use strict whitelisting of allowed modules and files",
 				Score:          -26,
 			},
 			// PHP RFI
 			{
-				ID:             "A9",
-				Type:           "REMOTE_FILE_INCLUSION",
-				Severity:       "critical",
-				Description:    "Remote file inclusion detected",
-				Pattern:        regexp.MustCompile(`(?i)(include|require).*(http://|https://|ftp://)`),
+				ID:          "A9",
+				Type:        "REMOTE_FILE_INCLUSION",
+				Severity:    "critical",
+				Description: "Remote file inclusion detected",
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`(include|require|require_once|include_once)\s*[\s(]["']?(https?://|ftp://|//)|` +
+					`allow_url_include\s*=\s*(On|1|true)|` +
+					`allow_url_fopen\s*=\s*(On|1|true)|` +
+					`file_get_contents\s*\(\s*["']https?://|` +
+					`urllib\.(request\.)?urlopen\s*\(.{0,100}(include|template|view|page)` +
+					`)`),
 				Recommendation: "Use local files only",
 				Score:          -25,
 			},
@@ -122,28 +205,56 @@ func NewClassADetector() *ClassADetector {
 				Type:        "PATH_TRAVERSAL",
 				Severity:    "high",
 				Description: "Path traversal vulnerability",
-				//Pattern:        regexp.MustCompile(`(?i)(open|readFile|sendFile|createReadStream|cat|type).*(\+|%s).*(\.\./|\.\.\\|/\.\.|\\\.\.)`),
-				Pattern:        regexp.MustCompile(`(?is)(open|readFile|sendFile|createReadStream|cat|type)\s*\(?.*(\+|%s)?.*(\.\./|\.\.\\|/\.\.|\\\.\.|request|input|params|user|req\.)`),
+				Pattern: regexp.MustCompile(`(?is)(` +
+					`open\s*\([^)]*["'][rwab]|` +
+					`os\.(Open|ReadFile|Create)\s*\(|` +
+					`fs\.(readFile|readFileSync|createReadStream)\s*\(|` +
+					`res\.(sendFile|download)\s*\(|` +
+					`FileInputStream\s*\(|` +
+					`new\s+File\s*\(|` +
+					`filepath\.(Join|Abs)\s*\(` +
+					`).{0,200}?(` +
+					`\.\./|` +
+					`\.\.\\|` +
+					`/\.\.|` +
+					`\\\.\.|` +
+					`request\.|req\.|params|input|user|query` +
+					`)`),
 				Recommendation: "Normalize paths and validate input",
 				Score:          -18,
 			},
 			// Hardcoded Credentials
 			{
-				ID:             "A11",
-				Type:           "HARDCODED_CREDENTIALS",
-				Severity:       "high",
-				Description:    "Hardcoded credentials in source code",
-				Pattern:        regexp.MustCompile(`(?i)(password|passwd|secret|api_key|apikey|token|auth_token|aws_access_key_id|aws_secret_access_key|private_key)\s*[:=]\s*["'][^"']{4,}["']`),
+				ID:          "A11",
+				Type:        "HARDCODED_CREDENTIALS",
+				Severity:    "high",
+				Description: "Hardcoded credentials in source code",
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`password|passwd|secret|api_key|apikey|` +
+					`token|auth_token|access_token|` +
+					`aws_access_key_id|aws_secret_access_key|` +
+					`private_key|client_secret|db_password` +
+					`)\s*[:=]+\s*["'][^"'\s]{6,}["']`),
 				Recommendation: "Use environment variables or secret management",
 				Score:          -16,
 			},
 			// Sensitive Info in Comments
 			{
-				ID:             "A12",
-				Type:           "SENSITIVE_COMMENT",
-				Severity:       "medium",
-				Description:    "Sensitive information disclosed in comments",
-				Pattern:        regexp.MustCompile(`(?i)(//|#|/\*|\*).*?(password|secret|key|token|todo|fixme|hack|bypass|backdoor|admin|root)`),
+				ID:          "A12",
+				Type:        "SENSITIVE_COMMENT",
+				Severity:    "medium",
+				Description: "Sensitive information disclosed in comments",
+				Pattern: regexp.MustCompile(`(?i)(//|#|/\*|--|\*)\s*.{0,50}?(` +
+					`password\s*[:=]|` +
+					`secret\s*[:=]|` +
+					`api[_-]?key\s*[:=]|` +
+					`token\s*[:=]|` +
+					`private[_-]?key|` +
+					`backdoor|bypass\s+auth|` +
+					`hardcoded|` +
+					`admin.*password|` +
+					`credentials?` +
+					`)`),
 				Recommendation: "Remove sensitive information from comments before committing",
 				Score:          -8,
 			},
@@ -153,8 +264,14 @@ func NewClassADetector() *ClassADetector {
 				Type:        "DEBUG_ENABLED",
 				Severity:    "medium",
 				Description: "Debug mode or code left enabled",
-				// Pattern:        regexp.MustCompile(`(?i)(DEBUG\s*=\s*True|debug\s*=\s*true|app\.debug\s*=\s*true|console\.log\(|printStackTrace|debugger;)`),
-				Pattern:        regexp.MustCompile(`(?i)(\b\w*debug\w*\b\s*(:=|=)\s*true|console\.log\s*\(|fmt\.Println\s*\(|printStackTrace\s*\(|debugger;)`),
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`\b(debug|DEBUG)\s*(=|:=)\s*(True|true|1)|` +
+					`app\.(debug|config\[["']DEBUG["']\])\s*=\s*(True|true)|` +
+					`console\.(log|debug|trace)\s*\(|` +
+					`debugger\s*;|` +
+					`\bpprint\s*\(|` +
+					`fmt\.(Printf|Println)\s*\([^)]*("DEBUG|"debug|debug:)` +
+					`)`),
 				Recommendation: "Disable debug mode in production. Remove console.log statements",
 				Score:          -9,
 			},
@@ -164,8 +281,19 @@ func NewClassADetector() *ClassADetector {
 				Type:        "LOGGED_SECRETS",
 				Severity:    "high",
 				Description: "Sensitive information logged",
-				// Pattern:        regexp.MustCompile(`(?i)(log|logger|console\.log|print|printf|syslog).*(password|secret|token|key|credential|auth)`),
-				Pattern:        regexp.MustCompile(`(?i)(\b(log|logger|console\.log|print|printf|syslog)\b).*?(password|secret|token|api[_-]?key|auth[_-]?token|credential)`),
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`\b(print|println|printf)\s*\(|` +
+					`console\.(log|info|warn|error)\s*\(|` +
+					`(log|logger)\.(debug|info|warn|error|fatal|print|println)\s*\(|` +
+					`logging\.(debug|info|warning|error|critical)\s*\(|` +
+					`syslog\s*\(|` +
+					`fmt\.(Print|Printf|Println|Fprintf)\s*\(` +
+					`).{0,200}?(` +
+					`password|passwd|secret|` +
+					`api[_-]?key|access[_-]?token|` +
+					`auth[_-]?token|private[_-]?key|` +
+					`credit[_-]?card|ssn|cvv` +
+					`)`),
 				Recommendation: "Log identifiers only, Never credentials or secrets",
 				Score:          -15,
 			},
@@ -175,21 +303,34 @@ func NewClassADetector() *ClassADetector {
 				Type:        "STACK_TRACE_EXPOSED",
 				Severity:    "medium",
 				Description: "Stack trace printing in production code",
-				// Pattern:        regexp.MustCompile(`(?i)(printStackTrace|traceback\.print_exc|traceback\.format_exc|console\.error\(.*error.*stack)`),
-				Pattern:        regexp.MustCompile(`(?is)(printStackTrace|traceback\.print_exc|traceback\.format_exc|console\.error\s*\(.*?stack|error\.stack)`),
+				Pattern: regexp.MustCompile(`(?is)(` +
+					`printStackTrace\s*\(|` +
+					`traceback\.print_exc\s*\(|` +
+					`traceback\.print_tb\s*\(|` +
+					`traceback\.format_exc\s*\(\)|` +
+					`console\.(error|log)\s*\([^)]*\.(stack|trace)|` +
+					`res\.(send|json)\s*\([^)]*err(or)?\.stack|` +
+					`w\.Write\s*\([^)]*err\.Error\(\)|` +
+					`fmt\.(Fprintf|Println)\s*\(\s*w[^)]*err` +
+					`)`),
 				Recommendation: "Use generic error messages and log details server-side only",
 				Score:          -10,
 			},
 			// Null Pointer Risk (limited detection)
-			// {
-			// 	ID:             "A16",
-			// 	Type:           "NULL_POINTER_RISK",
-			// 	Severity:       "low",
-			// 	Description:    "Potential null pointer dereference",
-			// 	Pattern:        regexp.MustCompile(`(?i)(\.[a-zA-Z_]+\(\))(?![\s\S]*?(if\s*\(|!=\s*null|!==\s*null|is\s+not\s+None|is\s+None))`),
-			// 	Recommendation: "Add null checks before method invocation",
-			// 	Score:          -5,
-			// },
+			{
+				ID:          "A16",
+				Type:        "NULL_POINTER_RISK",
+				Severity:    "low",
+				Description: "Potential null or nil dereference without prior null check",
+				Pattern: regexp.MustCompile(`(?i)(` +
+					`getParameter\s*\([^)]+\)\s*\.\w+|` +
+					`getElementById\s*\([^)]+\)\s*\.\w+|` +
+					`querySelector\s*\([^)]+\)\s*\.\w+|` +
+					`json\.(loads|load)\s*\([^)]+\)\[` +
+					`)`),
+				Recommendation: "Check for null or nil before dereferencing. Use optional chaining or explicit null checks.",
+				Score:          -5,
+			},
 		},
 	}
 }
