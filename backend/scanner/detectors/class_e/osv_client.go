@@ -51,9 +51,6 @@ func queryOSV(ecosystem, name, version string) (*osvResponse, error) {
 		return nil, err
 	}
 
-	// ---------DEBUGGING --------------
-	log.Printf("Querying OSV: %s/%s@%s", ecosystem, name, version)
-	// --------------------------------
 	resp, err := http.Post("https://api.osv.dev/v1/query", "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
@@ -70,9 +67,6 @@ func queryOSV(ecosystem, name, version string) (*osvResponse, error) {
 		return nil, err
 	}
 
-	// ---------DEBUGGING --------------
-	log.Printf("Found %d vulnerabilities for %s@%s", len(result.Vulnerabilities), name, version)
-	// --------------------------------
 	return &result, nil
 
 }

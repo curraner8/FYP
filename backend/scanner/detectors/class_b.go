@@ -158,5 +158,11 @@ func (d *ClassBDetector) Detect(filename, content string) []models.Finding {
 		}
 	}
 
+	for i := range findings {
+		if findings[i].ID == "B9" {
+			findings[i].Confidence = "medium"
+		}
+	}
+
 	return findings
 }
