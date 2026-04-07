@@ -11,7 +11,7 @@ type ClassDDetector struct {
 	rules []PatternRule
 }
 
-// used by D1 and D4 checks in Detect
+// used by D1 for checks in Detect
 var routePattern = regexp.MustCompile(`(?i)(` +
 	`@app\.route\s*\([^)]+\)|` +
 	`@router\.(get|post|put|delete)\s*\(|` +
