@@ -65,9 +65,9 @@ func checkPyPI(class, content string) []models.Finding {
 				Line:           lineNum + 1,
 				Snippet:        line,
 				Recommendation: "Upgrade to a fixed version",
-				Severity:       "medium",
-				Confidence:     "medium",
-				ScoreImpact:    -10,
+				Severity:       "high",
+				Confidence:     "high",
+				ScoreImpact:    -18,
 			})
 		}
 
