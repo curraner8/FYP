@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -58,7 +57,6 @@ func queryOSV(ecosystem, name, version string) (*osvResponse, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("OSV API returned status: %d", resp.StatusCode)
 		return nil, fmt.Errorf("OSV API error: %d", resp.StatusCode)
 	}
 
