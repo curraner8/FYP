@@ -2,6 +2,7 @@ package detectors
 
 import (
 	"FYP/backend/models"
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -51,4 +52,27 @@ func (b *BaseDetector) Description() string {
 
 func getLines(content string) []string {
 	return strings.Split(content, "\n")
+}
+
+func getContext(content string, lineNum int, contextLines int) string {
+	lines := strings.Split(content, "\n")
+	start := lineNum - contextLines
+	if start < 1 {
+		start = 1
+	}
+
+	end := lineNum + contextLines
+	if end > len(lines) {
+		end = len(lines)
+	}
+
+	var contextBuilder strings.Builder
+	for i := start; i <= end; i++ {
+		if i == lineNum {
+			contextBuilder.WriteString(fmt.Sprintf("->>> %d: %s\n", i, lines[i-1]))
+		} else {
+			contextBuilder.WriteString(fmt.Sprintf("    %d: %s\n", i, lines[i-1]))
+		}
+	}
+	return contextBuilder.String()
 }

@@ -123,7 +123,7 @@ func NewClassBDetector() *ClassBDetector {
 					`XmlDocument\s*\(\s*\)|` +
 					`new\s+XmlTextReader\s*\(` +
 					`)`),
-				Recommendation: "Disable external entities and DTDs explicitly. See OWASP XXE Prevention Cheat Sheet at cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html",
+				Recommendation: "Disable external entities and DTDs explicitly.",
 				Score:          -18,
 			},
 		},
@@ -142,6 +142,8 @@ func (d *ClassBDetector) Detect(filename, content string) []models.Finding {
 					snippet = snippet[:100] + "..."
 				}
 
+				context := getContext(content, lineNum, 10)
+
 				findings = append(findings, models.Finding{
 					ID:             rule.ID,
 					Class:          d.class,
@@ -149,6 +151,7 @@ func (d *ClassBDetector) Detect(filename, content string) []models.Finding {
 					Description:    rule.Description,
 					Line:           lineNum + 1,
 					Snippet:        snippet,
+					Context:        context,
 					Recommendation: rule.Recommendation,
 					Severity:       rule.Severity,
 					Confidence:     "high",

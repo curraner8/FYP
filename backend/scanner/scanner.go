@@ -10,10 +10,7 @@ import (
 var SupportedExtensions = map[string]bool{
 	".py":   true,
 	".js":   true,
-	".jsx":  true,
 	".ts":   true,
-	".tsx":  true,
-	".html": true,
 	".java": true,
 	".go":   true,
 	".txt":  true,

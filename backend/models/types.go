@@ -7,6 +7,7 @@ type Finding struct {
 	Description    string `json:"description"`
 	Line           int    `json:"line"`
 	Snippet        string `json:"snippet"`
+	Context        string `json:"context"`
 	Recommendation string `json:"recommendation"`
 	Severity       string `json:"severity"`
 	Confidence     string `json:"confidence"`   // high/medium/low, class dependent (how accurately can this be detected)

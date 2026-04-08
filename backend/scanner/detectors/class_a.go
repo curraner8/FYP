@@ -356,6 +356,8 @@ func (d *ClassADetector) Detect(filename, content string) []models.Finding {
 				snippet = snippet[:100] + "..."
 			}
 
+			context := getContext(content, lineNum, 10)
+
 			findings = append(findings, models.Finding{
 				ID:             rule.ID,
 				Class:          d.class,
@@ -365,6 +367,7 @@ func (d *ClassADetector) Detect(filename, content string) []models.Finding {
 				Snippet:        snippet,
 				Recommendation: rule.Recommendation,
 				Severity:       rule.Severity,
+				Context:        context,
 				Confidence:     "high",
 				ScoreImpact:    rule.Score,
 			})

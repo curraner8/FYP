@@ -43,9 +43,9 @@ func classWeight(class string) float64 {
 	case "D":
 		return 0.5
 	case "E":
-		return 0.4
+		return 0.8
 	default:
-		return 0.3
+		return 0
 	}
 }
 

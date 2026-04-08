@@ -21,7 +21,21 @@ func GetLLMSuggestion(finding models.Finding, language string) (string, string) 
 
 	url := "https://api.groq.com/openai/v1/chat/completions"
 
-	prompt := fmt.Sprintf("Fix this %s vulnerability: %s. Code: %s. Provide answer strictly as FIX: [code] WHY: [explanation]", finding.Type, finding.Description, finding.Snippet)
+	prompt := fmt.Sprintf(`You are a senior security engineer.
+		Vulnerability Type: %s
+		Description: %s
+
+		The vulnerable code appears on line %d, and this is the surrounding context:
+		%s
+
+		Fix the vulnerability by modifying ONLY the existing code shown above.
+		DO NOT create new classes, helper functions or import statements unless absolutely necessary.
+		Keep the fix minimal and focused on the vulnerable line.
+
+		Respond EXACTLY in this format:
+		FIX: [the fixed code (only the modified lines that changed)]
+		WHY: [one to three short sentences explaining the fix`,
+		finding.Type, finding.Description, finding.Line, finding.Context)
 
 	payload := map[string]interface{}{
 		"model": "llama-3.3-70b-versatile",
@@ -63,6 +77,14 @@ func GetLLMSuggestion(finding models.Finding, language string) (string, string) 
 	if len(parts) > 1 {
 		explanation = strings.TrimSpace(parts[1])
 	}
+
+	// markdown code block fixes
+	fix = strings.TrimPrefix(fix, "```java")
+	fix = strings.TrimPrefix(fix, "```python")
+	fix = strings.TrimPrefix(fix, "```javascript")
+	fix = strings.TrimPrefix(fix, "```go")
+	fix = strings.TrimSuffix(fix, "```")
+	fix = strings.TrimSpace(fix)
 
 	return fix, explanation
 }
