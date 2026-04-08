@@ -135,7 +135,7 @@ func NewClassCDetector() *ClassCDetector {
 					`allow_origins\s*=\s*\[["']\*["']\]` +
 					`)`),
 				Recommendation: "Restrict CORS to specific trusted domains",
-				Score:          -12,
+				Score:          -11,
 			},
 		},
 	}
