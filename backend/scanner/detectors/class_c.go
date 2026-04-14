@@ -111,17 +111,6 @@ func NewClassCDetector() *ClassCDetector {
 				Recommendation: "Load secrets at runtime from secure storage; never export in scripts or Dockerfiles",
 				Score:          -18,
 			},
-			// Missing security headers
-			// {
-			// 	ID:             "C8",
-			// 	Type:           "MISSING_SECURITY_HEADERS",
-			// 	Severity:       "medium",
-			// 	Description:    "Security headers not configured",
-			// 	Pattern:        regexp.MustCompile(`(?i)(app\.use\s*\(\s*helmet|app\.use\s*\(\s*security|header\s*\(\s*["']X-Frame-Options|Content-Security-Policy)`),
-			// 	Recommendation: "Implement CSP, X-Frame-Options, X-Content-Type-Options, HSTS headers",
-			// 	Score:          -10,
-			// },
-			// Permissive CORS
 			{
 				ID:          "C9",
 				Type:        "PERMISSIVE_CORS",

@@ -183,25 +183,9 @@ func NewClassADetector() *ClassADetector {
 				Recommendation: "Use strict whitelisting of allowed modules and files",
 				Score:          -26,
 			},
-			// PHP RFI
-			{
-				ID:          "A9",
-				Type:        "REMOTE_FILE_INCLUSION",
-				Severity:    "critical",
-				Description: "Remote file inclusion detected",
-				Pattern: regexp.MustCompile(`(?i)(` +
-					`(include|require|require_once|include_once)\s*[\s(]["']?(https?://|ftp://|//)|` +
-					`allow_url_include\s*=\s*(On|1|true)|` +
-					`allow_url_fopen\s*=\s*(On|1|true)|` +
-					`file_get_contents\s*\(\s*["']https?://|` +
-					`urllib\.(request\.)?urlopen\s*\(.{0,100}(include|template|view|page)` +
-					`)`),
-				Recommendation: "Use local files only",
-				Score:          -25,
-			},
 			// Path Traversal
 			{
-				ID:          "A10",
+				ID:          "A9",
 				Type:        "PATH_TRAVERSAL",
 				Severity:    "high",
 				Description: "Path traversal vulnerability",
@@ -225,7 +209,7 @@ func NewClassADetector() *ClassADetector {
 			},
 			// Hardcoded Credentials
 			{
-				ID:          "A11",
+				ID:          "A10",
 				Type:        "HARDCODED_CREDENTIALS",
 				Severity:    "high",
 				Description: "Hardcoded credentials in source code",
@@ -240,7 +224,7 @@ func NewClassADetector() *ClassADetector {
 			},
 			// Sensitive Info in Comments
 			{
-				ID:          "A12",
+				ID:          "A11",
 				Type:        "SENSITIVE_COMMENT",
 				Severity:    "medium",
 				Description: "Sensitive information disclosed in comments",
@@ -260,7 +244,7 @@ func NewClassADetector() *ClassADetector {
 			},
 			// Debug Code Enabled
 			{
-				ID:          "A13",
+				ID:          "A12",
 				Type:        "DEBUG_ENABLED",
 				Severity:    "medium",
 				Description: "Debug mode or code left enabled",
@@ -277,7 +261,7 @@ func NewClassADetector() *ClassADetector {
 			},
 			// Logging Secrets
 			{
-				ID:          "A14",
+				ID:          "A13",
 				Type:        "LOGGED_SECRETS",
 				Severity:    "high",
 				Description: "Sensitive information logged",
@@ -299,7 +283,7 @@ func NewClassADetector() *ClassADetector {
 			},
 			// Stack Traces Exposed
 			{
-				ID:          "A15",
+				ID:          "A14",
 				Type:        "STACK_TRACE_EXPOSED",
 				Severity:    "medium",
 				Description: "Stack trace printing in production code",
@@ -318,7 +302,7 @@ func NewClassADetector() *ClassADetector {
 			},
 			// Null Pointer Risk (limited detection)
 			{
-				ID:          "A16",
+				ID:          "A15",
 				Type:        "NULL_POINTER_RISK",
 				Severity:    "low",
 				Description: "Potential null or nil dereference without prior null check",

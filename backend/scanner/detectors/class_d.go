@@ -125,20 +125,6 @@ func NewClassDDetector() *ClassDDetector {
 				Recommendation: "Use POST requests with body for sensitive data",
 				Score:          -6,
 			},
-			// Direct user ID usage
-			{
-				ID:          "D9",
-				Type:        "DIRECT_USER_ID",
-				Severity:    "high",
-				Description: "User ID from request used directly in query",
-				Pattern: regexp.MustCompile(`(?i)(user_id|account_id|owner_id|userId|accountId)\s*=\s*(` +
-					`(request|params|req|args|input|body)\s*[\[.]|` +
-					`request\.(GET|POST|args|form)\.get\s*\([^)]*user_id|` +
-					`req\.(params|body|query)\.(user_id|userId|account_id)` +
-					`)`),
-				Recommendation: "MANUAL REVIEW: Use session-derived user id instead of request params",
-				Score:          -15,
-			},
 		},
 	}
 }
