@@ -49,17 +49,3 @@ type ScanRequest struct {
 		Content string `json:"content"`
 	} `json:"files"`
 }
-
-// for LLM remedies (better fix recommendations which have proper context of the full code (in file or all uploaded files (not sure yet)))
-
-type LLMRequest struct {
-	Code        string  `json:"code"`
-	Finding     Finding `json:"finding"`
-	Language    string  `json:"language"`
-	FileContext string  `json:"file_context"`
-}
-
-type LLMResponse struct {
-	Fix         string `json:"fix"`
-	Explanation string `json:"explanation"`
-}
